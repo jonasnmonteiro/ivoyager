@@ -1,0 +1,20 @@
+{
+  "name": "ivoyager-websocket-server",
+  "version": "1.0.0",
+  "description": "High frequency live currency ticker websocket server for iVoyager",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
