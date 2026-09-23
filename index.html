@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Offline-First Multi-Currency Financial Suite, VET Engine, Smart Cart, and Geospatial Radar">
+  <meta name="description" content="Offline-First Multi-Currency Financial Suite, Multi-Origin VET Engine, and Geospatial Radar">
   <title>iVoyager - Travel Financial Suite & Geospatial Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,7 +65,6 @@
       padding-bottom: 20px;
       border-bottom: 1px solid var(--border-subtle);
       margin-bottom: 28px;
-      position: relative;
     }
 
     .brand-title {
@@ -209,6 +208,35 @@
       gap: 12px;
     }
 
+    .converter-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .swap-btn {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--primary);
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .swap-btn:hover {
+      background-color: var(--primary);
+      color: #060B13;
+    }
+
     .btn {
       display: inline-flex;
       justify-content: center;
@@ -340,6 +368,28 @@
       font-weight: 600;
     }
 
+    .search-bar-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 14px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
     #map {
       width: 100%;
       height: 420px;
@@ -366,6 +416,12 @@
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .radar-item:hover {
+      border-color: var(--primary);
     }
 
     .radar-info strong {
@@ -386,6 +442,7 @@
       background-color: var(--primary-subtle);
       padding: 4px 8px;
       border-radius: 6px;
+      white-space: nowrap;
     }
 
     .feature-list {
@@ -451,7 +508,7 @@
     <header class="header">
       <div class="brand-group">
         <a href="#" class="brand-title">iVoyager</a>
-        <p class="brand-subtitle">Financial Suite, VET Engine, and Travel Radar</p>
+        <p class="brand-subtitle">Financial Suite, Multi-Destination VET Engine, and Geospatial Radar</p>
       </div>
 
       <nav class="nav-desktop">
@@ -475,56 +532,125 @@
       <section id="tab-calculator" class="tab-content active">
         <div class="grid">
           <div class="card">
-            <h2 class="card-title">VET Tax Calculator</h2>
-            <div class="form-group">
-              <label class="form-label" for="vet-amount">Foreign Amount</label>
-              <input type="number" id="vet-amount" class="form-input" value="1000" min="1" step="any">
+            <h2 class="card-title">Multi-Destination VET Tax Calculator</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="vet-home-currency">Your Home Currency</label>
+                <select id="vet-home-currency" class="form-select">
+                  <option value="BRL" selected>BRL (Brazilian Real)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                  <option value="ARS">ARS (Argentine Peso)</option>
+                  <option value="CLP">CLP (Chilean Peso)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                  <option value="PYG">PYG (Paraguayan Guarani)</option>
+                  <option value="GBP">GBP (British Pound)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vet-target-currency">Travel Target Currency</label>
+                <select id="vet-target-currency" class="form-select">
+                  <option value="ARS_BLUE" selected>ARS Blue (Argentine Peso Blue)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                  <option value="ARS_OFFICIAL">ARS Official (Argentine Peso Official)</option>
+                  <option value="CLP">CLP (Chilean Peso)</option>
+                  <option value="PYG">PYG (Paraguayan Guarani)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                  <option value="BRL">BRL (Brazilian Real)</option>
+                  <option value="GBP">GBP (British Pound)</option>
+                  <option value="CAD">CAD (Canadian Dollar)</option>
+                  <option value="USDT">USDT (Tether Stablecoin)</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="vet-rate">Commercial Rate (BRL)</label>
-              <input type="number" id="vet-rate" class="form-input" value="5.60" min="0.01" step="0.01">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="vet-foreign-amount">Target Amount to Spend</label>
+                <input type="number" id="vet-foreign-amount" class="form-input" value="100000" min="1" step="any">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="vet-exchange-rate">Effective Base Rate</label>
+                <input type="number" id="vet-exchange-rate" class="form-input" value="241.07" min="0.000001" step="any">
+              </div>
             </div>
+
             <div class="form-group">
-              <label class="form-label" for="vet-method">Payment Instrument</label>
-              <select id="vet-method" class="form-select">
+              <label class="form-label" for="vet-payment-method">Payment Instrument</label>
+              <select id="vet-payment-method" class="form-select">
                 <option value="global_account">Global Digital Account (IOF 1.10% + Spread 1.50%)</option>
                 <option value="credit_card">Traditional Credit Card (IOF 4.38% + Spread 4.50%)</option>
                 <option value="cash">Cash in Person (IOF 1.10% + Spread 2.50%)</option>
                 <option value="crypto_p2p">Crypto P2P Remittance (IOF 0.00% + Spread 0.50%)</option>
               </select>
             </div>
-            <button id="vet-calc-btn" class="btn" type="button">Calculate Total Cost</button>
+
+            <button id="vet-calc-btn" class="btn" type="button">Calculate Total Effective Cost</button>
+
             <div class="result-box">
-              <div class="result-row"><span>Commercial Gross:</span><span id="res-gross">R$ 5,600.00</span></div>
-              <div class="result-row"><span>Bank Spread:</span><span id="res-spread">R$ 84.00</span></div>
-              <div class="result-row"><span>IOF Tax:</span><span id="res-iof">R$ 62.52</span></div>
-              <div class="result-row"><span>Effective VET Rate:</span><span id="res-vet">R$ 5.7465</span></div>
-              <div class="result-row total-row"><span>Final Cost:</span><span id="res-total">R$ 5,746.52</span></div>
+              <div class="result-row"><span>Commercial Gross:</span><span id="res-gross">R$ 414.82</span></div>
+              <div class="result-row"><span>Bank Spread:</span><span id="res-spread">R$ 6.22</span></div>
+              <div class="result-row"><span>IOF Tax:</span><span id="res-iof">R$ 4.63</span></div>
+              <div class="result-row"><span>Effective VET Rate:</span><span id="res-vet">R$ 0.004257</span></div>
+              <div class="result-row total-row"><span>Total Cost in Home Currency:</span><span id="res-total">R$ 425.67</span></div>
             </div>
           </div>
 
           <div class="card">
-            <h2 class="card-title">Cross-Currency Converter & Parallel Rates</h2>
+            <h2 class="card-title">Universal Cross-Currency Converter</h2>
+            
             <div class="form-group">
-              <label class="form-label" for="conv-amount">Amount</label>
-              <input type="number" id="conv-amount" class="form-input" value="100" min="1" step="any">
+              <label class="form-label" for="conv-amount">Amount to Convert</label>
+              <input type="number" id="conv-amount" class="form-input" value="1000" min="1" step="any">
             </div>
-            <div class="form-group">
-              <label class="form-label" for="conv-pair">Currency Pair</label>
-              <select id="conv-pair" class="form-select">
-                <option value="USD_BRL">USD to BRL (Commercial Rate)</option>
-                <option value="USD_ARS_BLUE">USD to ARS (Dolar Blue)</option>
-                <option value="EUR_BRL">EUR to BRL (Commercial Rate)</option>
-                <option value="BRL_CLP">BRL to CLP (Chilean Peso)</option>
-                <option value="USD_PYG">USD to PYG (Paraguayan Guarani)</option>
-                <option value="USD_UYU">USD to UYU (Uruguayan Peso)</option>
-              </select>
+
+            <div class="converter-row">
+              <div style="flex: 1;">
+                <label class="form-label" for="conv-from">From</label>
+                <select id="conv-from" class="form-select">
+                  <option value="BRL" selected>BRL (Brazilian Real)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                  <option value="ARS_BLUE">ARS (Dolar Blue)</option>
+                  <option value="ARS_OFFICIAL">ARS (Official)</option>
+                  <option value="CLP">CLP (Chilean Peso)</option>
+                  <option value="PYG">PYG (Paraguayan Guarani)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                  <option value="GBP">GBP (British Pound)</option>
+                  <option value="CAD">CAD (Canadian Dollar)</option>
+                  <option value="USDT">USDT (Stablecoin)</option>
+                </select>
+              </div>
+
+              <button id="swap-currencies-btn" class="swap-btn" type="button" title="Swap origin and target currencies">&#8646;</button>
+
+              <div style="flex: 1;">
+                <label class="form-label" for="conv-to">To</label>
+                <select id="conv-to" class="form-select">
+                  <option value="ARS_BLUE" selected>ARS (Dolar Blue)</option>
+                  <option value="BRL">BRL (Brazilian Real)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                  <option value="ARS_OFFICIAL">ARS (Official)</option>
+                  <option value="CLP">CLP (Chilean Peso)</option>
+                  <option value="PYG">PYG (Paraguayan Guarani)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                  <option value="GBP">GBP (British Pound)</option>
+                  <option value="CAD">CAD (Canadian Dollar)</option>
+                  <option value="USDT">USDT (Stablecoin)</option>
+                </select>
+              </div>
             </div>
-            <button id="conv-btn" class="btn" type="button">Convert</button>
+
+            <button id="conv-btn" class="btn" type="button">Convert Cross-Rate</button>
+
             <div class="result-box">
-              <div class="result-row"><span>Source:</span><span id="conv-src">100.00 USD</span></div>
-              <div class="result-row"><span>Rate Applied:</span><span id="conv-rate">5.6000</span></div>
-              <div class="result-row total-row"><span>Result:</span><span id="conv-dest">560.00 BRL</span></div>
+              <div class="result-row"><span>Source:</span><span id="conv-src">1,000.00 BRL</span></div>
+              <div class="result-row"><span>Direct Rate:</span><span id="conv-rate">1 BRL = 241.0714 ARS</span></div>
+              <div class="result-row"><span>Inverse Rate:</span><span id="conv-inv-rate">1 ARS = 0.004148 BRL</span></div>
+              <div class="result-row"><span>Rate Type:</span><span id="conv-type" class="tag-badge" style="margin: 0;">Parallel Market (Blue)</span></div>
+              <div class="result-row total-row"><span>Converted Total:</span><span id="conv-dest">241,071.43 ARS</span></div>
             </div>
           </div>
         </div>
@@ -536,7 +662,7 @@
             <h2 class="card-title">Add Trip Expense Item</h2>
             <div class="form-group">
               <label class="form-label" for="item-name">Item / Product Name</label>
-              <input type="text" id="item-name" class="form-input" placeholder="e.g. Malbec Wine Reserva, Hotel Night, Electronics">
+              <input type="text" id="item-name" class="form-input" placeholder="e.g. Malbec Wine Reserva, Hotel Night, Dinner">
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -552,11 +678,13 @@
               <div class="form-group">
                 <label class="form-label" for="item-curr">Currency</label>
                 <select id="item-curr" class="form-select">
+                  <option value="ARS_BLUE">ARS (Argentine Peso Blue)</option>
                   <option value="USD">USD (US Dollar)</option>
-                  <option value="ARS">ARS (Argentine Peso Blue)</option>
                   <option value="EUR">EUR (Euro)</option>
                   <option value="CLP">CLP (Chilean Peso)</option>
                   <option value="PYG">PYG (Paraguayan Guarani)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                  <option value="BRL">BRL (Brazilian Real)</option>
                 </select>
               </div>
               <div class="form-group">
@@ -565,6 +693,7 @@
                   <option value="global_account">Global Account (1.1% + 1.5%)</option>
                   <option value="credit_card">Traditional Card (4.38% + 4.5%)</option>
                   <option value="cash">Cash in Person (1.1% + 2.5%)</option>
+                  <option value="crypto_p2p">Crypto P2P (0.0% + 0.5%)</option>
                 </select>
               </div>
             </div>
@@ -575,9 +704,9 @@
             <h2 class="card-title">Expenses Summary & Mini-Splitwise</h2>
             <div class="result-box" style="margin-top: 0;">
               <div class="result-row"><span>Items Count:</span><span id="cart-total-items">0 items</span></div>
-              <div class="result-row"><span>Gross Equivalent:</span><span id="cart-gross-brl">R$ 0.00</span></div>
+              <div class="result-row"><span>Gross Equivalent (BRL):</span><span id="cart-gross-brl">R$ 0.00</span></div>
               <div class="result-row"><span>Total VET Tax & Spread:</span><span id="cart-tax-brl">R$ 0.00</span></div>
-              <div class="result-row total-row"><span>Grand Total:</span><span id="cart-final-brl">R$ 0.00</span></div>
+              <div class="result-row total-row"><span>Grand Total (BRL with VET):</span><span id="cart-final-brl">R$ 0.00</span></div>
             </div>
             <div class="form-group" style="margin-top: 16px;">
               <label class="form-label" for="split-people">Split Between Travelers</label>
@@ -625,16 +754,26 @@
               <h2 class="card-title" style="margin-bottom: 4px;">OpenStreetMap Physical Exchange Radar</h2>
               <p style="font-size: 13px; color: var(--text-muted);">Find nearby money exchange bureaus, Western Union agents, and ATMs</p>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <select id="radar-city-select" class="form-select" style="width: auto; padding: 8px 12px;">
-                <option value="buenos_aires">Buenos Aires (Calle Florida)</option>
-                <option value="ciudad_del_este">Ciudad del Este (Shopping China)</option>
-                <option value="santiago">Santiago (Calle Agustinas)</option>
-                <option value="sao_paulo">Sao Paulo (Av. Paulista)</option>
+                <option value="cordoba">Cordoba, Argentina (Plaza San Martin & Peatonal)</option>
+                <option value="buenos_aires">Buenos Aires, Argentina (Calle Florida)</option>
+                <option value="mendoza">Mendoza, Argentina (Av. San Martin)</option>
+                <option value="bariloche">Bariloche, Argentina (Calle Mitre)</option>
+                <option value="ciudad_del_este">Ciudad del Este, Paraguay (Shopping China)</option>
+                <option value="santiago">Santiago, Chile (Calle Agustinas)</option>
+                <option value="montevideo">Montevideo, Uruguay (Ciudad Vieja)</option>
+                <option value="sao_paulo">Sao Paulo, Brazil (Av. Paulista)</option>
               </select>
               <button id="locate-me-btn" class="btn" style="width: auto; padding: 8px 16px;" type="button">Locate Me</button>
             </div>
           </div>
+
+          <div class="search-bar-container">
+            <input type="text" id="map-search-input" class="search-input" placeholder="Search any city, neighborhood, or landmark (e.g., Cordoba, Bariloche, Mendoza, Miami)...">
+            <button id="map-search-btn" class="btn" style="width: auto; padding: 10px 20px;" type="button">Search Location</button>
+          </div>
+
           <div id="map"></div>
           <div class="radar-list" id="radar-spots-container"></div>
         </div>
@@ -675,21 +814,32 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const conversionRates = {
-      USD_BRL: { rate: 5.60, dest: 'BRL', src: 'USD' },
-      USD_ARS_BLUE: { rate: 1350.00, dest: 'ARS', src: 'USD' },
-      EUR_BRL: { rate: 6.15, dest: 'BRL', src: 'EUR' },
-      BRL_CLP: { rate: 168.50, dest: 'CLP', src: 'BRL' },
-      USD_PYG: { rate: 7650.00, dest: 'PYG', src: 'USD' },
-      USD_UYU: { rate: 41.20, dest: 'UYU', src: 'USD' }
+    const baseRatesToUsd = {
+      USD: 1.0,
+      BRL: 5.60,
+      EUR: 0.915,
+      ARS_BLUE: 1350.00,
+      ARS_OFFICIAL: 980.00,
+      CLP: 945.00,
+      PYG: 7680.00,
+      UYU: 41.50,
+      GBP: 0.77,
+      CAD: 1.38,
+      USDT: 1.0
     };
 
-    const currencyToBaseBrl = {
-      USD: 5.60,
-      EUR: 6.15,
-      ARS: 5.60 / 1350.00,
-      CLP: 1 / 168.50,
-      PYG: 5.60 / 7650.00
+    const currencyLabels = {
+      USD: 'USD',
+      BRL: 'BRL',
+      EUR: 'EUR',
+      ARS_BLUE: 'ARS Blue',
+      ARS_OFFICIAL: 'ARS Official',
+      CLP: 'CLP',
+      PYG: 'PYG',
+      UYU: 'UYU',
+      GBP: 'GBP',
+      CAD: 'CAD',
+      USDT: 'USDT'
     };
 
     const methodConfigs = {
@@ -699,35 +849,72 @@
       crypto_p2p: { name: 'Crypto P2P', iof: 0.0, spread: 0.005 }
     };
 
-    function calculateVET() {
-      const amount = parseFloat(document.getElementById('vet-amount').value) || 0;
-      const baseRate = parseFloat(document.getElementById('vet-rate').value) || 0;
-      const method = document.getElementById('vet-method').value;
-      const config = methodConfigs[method] || methodConfigs.global_account;
-
-      const gross = amount * baseRate;
-      const spreadAmount = gross * config.spread;
-      const subtotal = gross + spreadAmount;
-      const iofAmount = subtotal * config.iof;
-      const total = subtotal + iofAmount;
-      const vet = amount > 0 ? (total / amount) : baseRate;
-
-      document.getElementById('res-gross').textContent = 'R$ ' + gross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('res-spread').textContent = 'R$ ' + spreadAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('res-iof').textContent = 'R$ ' + iofAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('res-vet').textContent = 'R$ ' + vet.toFixed(4);
-      document.getElementById('res-total').textContent = 'R$ ' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function getCrossRate(fromCode, toCode) {
+      const fromUsd = baseRatesToUsd[fromCode] || 1.0;
+      const toUsd = baseRatesToUsd[toCode] || 1.0;
+      return toUsd / fromUsd;
     }
 
-    function convertCurrency() {
-      const amount = parseFloat(document.getElementById('conv-amount').value) || 0;
-      const pair = document.getElementById('conv-pair').value;
-      const data = conversionRates[pair];
+    function updateVetDefaultRate() {
+      const home = document.getElementById('vet-home-currency').value;
+      const target = document.getElementById('vet-target-currency').value;
+      const rate = getCrossRate(home, target);
+      document.getElementById('vet-exchange-rate').value = rate >= 1 ? rate.toFixed(2) : rate.toFixed(6);
+      calculateVET();
+    }
 
-      const total = amount * data.rate;
-      document.getElementById('conv-src').textContent = amount.toFixed(2) + ' ' + data.src;
-      document.getElementById('conv-rate').textContent = data.rate.toFixed(4);
-      document.getElementById('conv-dest').textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + data.dest;
+    function calculateVET() {
+      const homeCurr = document.getElementById('vet-home-currency').value;
+      const targetCurr = document.getElementById('vet-target-currency').value;
+      const foreignAmount = parseFloat(document.getElementById('vet-foreign-amount').value) || 0;
+      const rate = parseFloat(document.getElementById('vet-exchange-rate').value) || 1;
+      const method = document.getElementById('vet-payment-method').value;
+      const config = methodConfigs[method] || methodConfigs.global_account;
+
+      const grossInHome = rate > 0 ? (foreignAmount / rate) : 0;
+      const spreadAmount = grossInHome * config.spread;
+      const subtotal = grossInHome + spreadAmount;
+      const iofAmount = subtotal * config.iof;
+      const totalInHome = subtotal + iofAmount;
+      const effectiveVetRate = foreignAmount > 0 ? (totalInHome / foreignAmount) : (1 / rate);
+
+      document.getElementById('res-gross').textContent = `${homeCurr} ${grossInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('res-spread').textContent = `${homeCurr} ${spreadAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('res-iof').textContent = `${homeCurr} ${iofAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('res-vet').textContent = `${homeCurr} ${effectiveVetRate.toFixed(6)} per ${currencyLabels[targetCurr]}`;
+      document.getElementById('res-total').textContent = `${homeCurr} ${totalInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function convertUniversalCrossRate() {
+      const amount = parseFloat(document.getElementById('conv-amount').value) || 0;
+      const from = document.getElementById('conv-from').value;
+      const to = document.getElementById('conv-to').value;
+
+      const rate = getCrossRate(from, to);
+      const invRate = getCrossRate(to, from);
+      const convertedTotal = amount * rate;
+
+      let typeBadge = 'Commercial Rate';
+      if (from.includes('BLUE') || to.includes('BLUE')) {
+        typeBadge = 'Parallel Market (Blue)';
+      } else if (from === 'USDT' || to === 'USDT') {
+        typeBadge = 'Crypto P2P Stablecoin';
+      }
+
+      document.getElementById('conv-src').textContent = `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[from]}`;
+      document.getElementById('conv-rate').textContent = `1 ${currencyLabels[from]} = ${rate >= 1 ? rate.toFixed(4) : rate.toFixed(6)} ${currencyLabels[to]}`;
+      document.getElementById('conv-inv-rate').textContent = `1 ${currencyLabels[to]} = ${invRate >= 1 ? invRate.toFixed(4) : invRate.toFixed(6)} ${currencyLabels[from]}`;
+      document.getElementById('conv-type').textContent = typeBadge;
+      document.getElementById('conv-dest').textContent = `${convertedTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[to]}`;
+    }
+
+    function swapCurrencies() {
+      const fromSelect = document.getElementById('conv-from');
+      const toSelect = document.getElementById('conv-to');
+      const temp = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = temp;
+      convertUniversalCrossRate();
     }
 
     const navButtons = document.querySelectorAll('.nav-btn');
@@ -782,7 +969,7 @@
         row.innerHTML = `
           <td><strong>${item.name}</strong></td>
           <td class="mono-cell">${item.quantity}</td>
-          <td class="mono-cell">${item.price.toFixed(2)} ${item.currency}</td>
+          <td class="mono-cell">${item.price.toFixed(2)} ${currencyLabels[item.currency]}</td>
           <td><span class="tag-badge" style="margin: 0;">${methodConfigs[item.method].name}</span></td>
           <td class="mono-cell" style="color: var(--primary);">R$ ${item.finalBrl.toFixed(2)}</td>
           <td><button class="btn btn-danger" onclick="deleteCartItem(${index})">Remove</button></td>
@@ -813,7 +1000,7 @@
         return;
       }
 
-      const rateToBrl = currencyToBaseBrl[currency] || 5.60;
+      const rateToBrl = getCrossRate(currency, 'BRL');
       const config = methodConfigs[method] || methodConfigs.global_account;
       const grossBrl = (price * quantity) * rateToBrl;
       const spreadBrl = grossBrl * config.spread;
@@ -856,7 +1043,7 @@
 
       let csv = 'Product Name,Quantity,Original Price,Currency,Payment Method,Final BRL (with VET)\n';
       cartItems.forEach(item => {
-        csv += `"${item.name}",${item.quantity},${item.price.toFixed(2)},${item.currency},"${methodConfigs[item.method].name}",${item.finalBrl.toFixed(2)}\n`;
+        csv += `"${item.name}",${item.quantity},${item.price.toFixed(2)},${currencyLabels[item.currency]},"${methodConfigs[item.method].name}",${item.finalBrl.toFixed(2)}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -877,6 +1064,17 @@
     let markersLayer = null;
 
     const cityHubs = {
+      cordoba: {
+        name: 'Cordoba (Plaza San Martin & Peatonal)',
+        lat: -31.4167,
+        lon: -64.1833,
+        spots: [
+          { name: 'Cambio Barujel Cordoba', type: 'Bureau de Change', lat: -31.4168, lon: -64.1825, address: 'San Jeronimo 281, Centro' },
+          { name: 'Western Union Peatonal 9 de Julio', type: 'Western Union Agent', lat: -31.4145, lon: -64.1848, address: '9 de Julio 150, Centro' },
+          { name: 'Exprinter Casa de Cambio', type: 'Bureau de Change', lat: -31.4158, lon: -64.1832, address: 'Rivadavia 45, Centro' },
+          { name: 'Bancor Plaza San Martin ATM', type: 'Bank / ATM', lat: -31.4172, lon: -64.1840, address: 'San Jeronimo 166, Centro' }
+        ]
+      },
       buenos_aires: {
         name: 'Buenos Aires (Calle Florida)',
         lat: -34.6037,
@@ -886,6 +1084,26 @@
           { name: 'Cambio Alpe', type: 'Bureau de Change', lat: -34.6041, lon: -58.3762, address: 'Sarmiento 480, CABA' },
           { name: 'Banco Nacion ATM', type: 'Bank / ATM', lat: -34.6080, lon: -58.3702, address: 'Bartolome Mitre 326' },
           { name: 'Galerias Pacifico Exchange', type: 'Bureau de Change', lat: -34.5998, lon: -58.3745, address: 'Av. Cordoba 550' }
+        ]
+      },
+      mendoza: {
+        name: 'Mendoza (Av. San Martin)',
+        lat: -32.8895,
+        lon: -68.8458,
+        spots: [
+          { name: 'Cambio Santiago Mendoza', type: 'Bureau de Change', lat: -32.8902, lon: -68.8445, address: 'San Martin 1199, Mendoza' },
+          { name: 'Western Union Peatonal Sarmiento', type: 'Western Union Agent', lat: -32.8888, lon: -68.8432, address: 'Sarmiento 55, Mendoza' },
+          { name: 'Banco Macro ATM Mendoza', type: 'Bank / ATM', lat: -32.8910, lon: -68.8460, address: 'Av. San Martin 1280' }
+        ]
+      },
+      bariloche: {
+        name: 'Bariloche (Calle Mitre)',
+        lat: -41.1335,
+        lon: -71.3103,
+        spots: [
+          { name: 'Cambio Andino Bariloche', type: 'Bureau de Change', lat: -41.1340, lon: -71.3090, address: 'Mitre 102, Centro' },
+          { name: 'Western Union Bariloche Centro', type: 'Western Union Agent', lat: -41.1328, lon: -71.3120, address: 'Villegas 222, Centro' },
+          { name: 'Banco Patagonia ATM Mitre', type: 'Bank / ATM', lat: -41.1345, lon: -71.3080, address: 'Mitre 440, Bariloche' }
         ]
       },
       ciudad_del_este: {
@@ -906,6 +1124,16 @@
           { name: 'Cambios Brollano', type: 'Bureau de Change', lat: -33.4412, lon: -70.6515, address: 'Agustinas 1050, Centro' },
           { name: 'Afex Agustinas', type: 'Bureau de Change', lat: -33.4425, lon: -70.6495, address: 'Agustinas 1070, Centro' },
           { name: 'Western Union Santiago Centro', type: 'Western Union Agent', lat: -33.4405, lon: -70.6480, address: 'Huerfanos 835' }
+        ]
+      },
+      montevideo: {
+        name: 'Montevideo (Ciudad Vieja)',
+        lat: -34.9065,
+        lon: -56.2010,
+        spots: [
+          { name: 'Cambio Gales Ciudad Vieja', type: 'Bureau de Change', lat: -34.9072, lon: -56.2025, address: 'Peatonal Sarandi 430' },
+          { name: 'Western Union 18 de Julio', type: 'Western Union Agent', lat: -34.9058, lon: -56.1985, address: 'Av. 18 de Julio 890' },
+          { name: 'Cambio Aspen Plaza Independencia', type: 'Bureau de Change', lat: -34.9060, lon: -56.1998, address: 'Plaza Independencia 750' }
         ]
       },
       sao_paulo: {
@@ -935,7 +1163,7 @@
     }
 
     function initMap() {
-      const defaultHub = cityHubs.buenos_aires;
+      const defaultHub = cityHubs.cordoba;
       mapInstance = L.map('map').setView([defaultHub.lat, defaultHub.lon], 15);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -944,26 +1172,30 @@
       }).addTo(mapInstance);
 
       markersLayer = L.layerGroup().addTo(mapInstance);
-      updateRadarView('buenos_aires');
+      updateRadarView('cordoba');
     }
 
     function updateRadarView(cityKey, userLocation = null) {
       const hub = cityHubs[cityKey];
-      if (!hub) return;
-
       markersLayer.clearLayers();
 
-      const centerLat = userLocation ? userLocation.lat : hub.lat;
-      const centerLon = userLocation ? userLocation.lon : hub.lon;
+      const centerLat = userLocation ? userLocation.lat : (hub ? hub.lat : -31.4167);
+      const centerLon = userLocation ? userLocation.lon : (hub ? hub.lon : -64.1833);
 
       mapInstance.setView([centerLat, centerLon], 15);
 
       if (userLocation) {
         L.marker([centerLat, centerLon]).addTo(markersLayer)
-          .bindPopup('<strong>Your Current Location</strong>').openPopup();
+          .bindPopup('<strong>Searched / GPS Location</strong>').openPopup();
       }
 
-      const spotsWithDistance = hub.spots.map(spot => {
+      let spots = hub ? hub.spots : [
+        { name: 'City Center Bureau de Change', type: 'Bureau de Change', lat: centerLat + 0.0015, lon: centerLon + 0.0012, address: 'Central Avenue' },
+        { name: 'Western Union Agent', type: 'Western Union Agent', lat: centerLat - 0.0018, lon: centerLon - 0.0010, address: 'Main Plaza' },
+        { name: 'International ATM Bank', type: 'Bank / ATM', lat: centerLat + 0.0022, lon: centerLon - 0.0015, address: 'Financial District' }
+      ];
+
+      const spotsWithDistance = spots.map(spot => {
         const dist = calculateDistance(centerLat, centerLon, spot.lat, spot.lon);
         return { ...spot, distanceMeters: dist };
       }).sort((a, b) => a.distanceMeters - b.distanceMeters);
@@ -996,6 +1228,39 @@
       });
     }
 
+    async function searchLocation() {
+      const query = document.getElementById('map-search-input').value.trim();
+      if (!query) {
+        alert('Please enter a location or city name to search.');
+        return;
+      }
+
+      const btn = document.getElementById('map-search-btn');
+      btn.textContent = 'Searching...';
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+        const data = await res.json();
+
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          updateRadarView(null, { lat, lon });
+        } else {
+          alert('Location not found. Please try a different query (e.g. Cordoba, Bariloche, Mendoza).');
+        }
+      } catch (err) {
+        alert('Geocoding service error. Please try again.');
+      } finally {
+        btn.textContent = 'Search Location';
+      }
+    }
+
+    document.getElementById('map-search-btn').addEventListener('click', searchLocation);
+    document.getElementById('map-search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') searchLocation();
+    });
+
     document.getElementById('radar-city-select').addEventListener('change', (e) => {
       updateRadarView(e.target.value);
     });
@@ -1005,8 +1270,7 @@
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const userLoc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-            const selectedCity = document.getElementById('radar-city-select').value;
-            updateRadarView(selectedCity, userLoc);
+            updateRadarView(null, userLoc);
           },
           () => {
             alert('Could not retrieve your GPS position. Please check browser permissions.');
@@ -1017,11 +1281,21 @@
       }
     });
 
+    document.getElementById('vet-home-currency').addEventListener('change', updateVetDefaultRate);
+    document.getElementById('vet-target-currency').addEventListener('change', updateVetDefaultRate);
+    document.getElementById('vet-payment-method').addEventListener('change', calculateVET);
+    document.getElementById('vet-foreign-amount').addEventListener('input', calculateVET);
+    document.getElementById('vet-exchange-rate').addEventListener('input', calculateVET);
     document.getElementById('vet-calc-btn').addEventListener('click', calculateVET);
-    document.getElementById('conv-btn').addEventListener('click', convertCurrency);
 
-    calculateVET();
-    convertCurrency();
+    document.getElementById('conv-from').addEventListener('change', convertUniversalCrossRate);
+    document.getElementById('conv-to').addEventListener('change', convertUniversalCrossRate);
+    document.getElementById('conv-amount').addEventListener('input', convertUniversalCrossRate);
+    document.getElementById('conv-btn').addEventListener('click', convertUniversalCrossRate);
+    document.getElementById('swap-currencies-btn').addEventListener('click', swapCurrencies);
+
+    updateVetDefaultRate();
+    convertUniversalCrossRate();
     initMap();
   </script>
 </body>

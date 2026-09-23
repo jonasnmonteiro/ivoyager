@@ -131,12 +131,44 @@ export class GeoRadarService {
           country: 'Chile',
           type: 'western_union'
         }
+      ],
+      cor: [
+        {
+          id: 'cor-1',
+          name: 'Cambio Barujel Cordoba',
+          latitude: -31.4168,
+          longitude: -64.1825,
+          address: 'San Jeronimo 281',
+          city: 'Cordoba',
+          country: 'Argentina',
+          type: 'bureau_de_change'
+        },
+        {
+          id: 'cor-2',
+          name: 'Western Union Peatonal 9 de Julio',
+          latitude: -31.4145,
+          longitude: -64.1848,
+          address: '9 de Julio 150',
+          city: 'Cordoba',
+          country: 'Argentina',
+          type: 'western_union'
+        },
+        {
+          id: 'cor-3',
+          name: 'Exprinter Casa de Cambio',
+          latitude: -31.4158,
+          longitude: -64.1832,
+          address: 'Rivadavia 45',
+          city: 'Cordoba',
+          country: 'Argentina',
+          type: 'bureau_de_change'
+        }
       ]
     };
 
     const rawList = cityDatabase[cityCode.toLowerCase()] || [];
-    const baseLat = userCoords?.latitude ?? (cityCode === 'bue' ? -34.6037 : -33.4400);
-    const baseLon = userCoords?.longitude ?? (cityCode === 'bue' ? -58.3816 : -70.6500);
+    const baseLat = userCoords?.latitude ?? (cityCode === 'bue' ? -34.6037 : cityCode === 'cor' ? -31.4167 : -33.4400);
+    const baseLon = userCoords?.longitude ?? (cityCode === 'bue' ? -58.3816 : cityCode === 'cor' ? -64.1833 : -70.6500);
 
     return rawList.map(spot => ({
       ...spot,
