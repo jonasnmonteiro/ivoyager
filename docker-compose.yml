@@ -5,12 +5,14 @@ services:
     restart: unless-stopped
     ports:
       - "8080:80"
+    depends_on:
+      - ivoyager-ticker-ws
 
   ivoyager-ticker-ws:
     build: ./websocket-server
     container_name: ivoyager-ticker-ws
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     environment:
       - PORT=3001

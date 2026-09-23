@@ -1974,7 +1974,8 @@
 
       if (typeof io !== 'undefined') {
         try {
-          const socket = io('http://localhost:3001', {
+          const socket = io({
+            path: '/socket.io/',
             timeout: 3000,
             reconnectionAttempts: 2
           });
