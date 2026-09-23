@@ -42,6 +42,18 @@ export interface ExchangeSpotRecord {
   updatedAt: number;
 }
 
+export interface CustomPoiRecord {
+  id: string;
+  name: string;
+  category: 'restaurant' | 'hotel' | 'attraction' | 'shopping' | 'exchange' | 'transport' | 'other';
+  latitude: number;
+  longitude: number;
+  address?: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface AppSettingRecord {
   key: string;
   value: string | number | boolean | object;
@@ -52,6 +64,7 @@ export class AppDatabase extends Dexie {
   public trips!: Table<TripRecord, string>;
   public expenses!: Table<ExpenseRecord, string>;
   public exchangeSpots!: Table<ExchangeSpotRecord, string>;
+  public customPois!: Table<CustomPoiRecord, string>;
   public settings!: Table<AppSettingRecord, string>;
 
   constructor(databaseName: string = 'iVoyagerDB') {
@@ -61,6 +74,7 @@ export class AppDatabase extends Dexie {
       trips: 'id, name, destination, baseCurrency, status, createdAt',
       expenses: 'id, tripId, category, originalCurrency, payerName, date, timestamp',
       exchangeSpots: 'id, city, country, type, updatedAt',
+      customPois: 'id, category, createdAt, updatedAt',
       settings: 'key'
     });
   }
