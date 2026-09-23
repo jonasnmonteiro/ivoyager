@@ -63,6 +63,71 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      background-color: #0A192F;
+      color: #E2E8F0;
+      padding: 8px 0;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation: tickerLoop 32s linear infinite;
+    }
+
+    .ticker:hover {
+      animation-play-state: paused;
+    }
+
+    .ticker__item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+
+    .ticker__item .pair {
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .ticker__item .rate {
+      color: #94A3B8;
+    }
+
+    .ticker__item .change {
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ticker__item .change.up {
+      color: #10B981;
+    }
+
+    .ticker__item .change.down {
+      color: #EF4444;
+    }
+
+    .ticker__item::after {
+      content: "•";
+      margin-left: 16px;
+      color: #475569;
+    }
+
+    @keyframes tickerLoop {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+
     .app-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -77,7 +142,7 @@
       align-items: center;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       gap: 12px;
     }
 
@@ -177,99 +242,6 @@
 
     .mobile-menu.open {
       display: flex;
-    }
-
-    .ticker-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background-color: #FFFFFF;
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px 14px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    .ticker-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 4px 8px;
-      border-radius: 6px;
-      background-color: var(--primary-subtle);
-      color: var(--primary-dark);
-      flex-shrink: 0;
-    }
-
-    .ticker-status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--success);
-      display: inline-block;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .ticker-items-track {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-      flex: 1;
-    }
-
-    .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
-
-    .ticker-item.flash-up {
-      background-color: rgba(16, 185, 129, 0.25);
-      color: #065F46;
-    }
-
-    .ticker-item.flash-down {
-      background-color: rgba(239, 68, 68, 0.25);
-      color: #991B1B;
-    }
-
-    .ticker-pair {
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .ticker-rate {
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .ticker-change {
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .ticker-change.up {
-      color: var(--success);
-    }
-
-    .ticker-change.down {
-      color: var(--danger);
     }
 
     .tab-content {
@@ -780,11 +752,6 @@
       color: var(--info);
     }
 
-    .tag-custom {
-      background-color: rgba(168, 85, 247, 0.12);
-      color: #7E22CE;
-    }
-
     .footer {
       margin-top: auto;
       padding: 20px 0;
@@ -840,14 +807,32 @@
       .form-row {
         grid-template-columns: 1fr;
       }
-      .ticker-bar {
-        padding: 6px 10px;
-        font-size: 11px;
-      }
     }
   </style>
 </head>
 <body>
+  <!-- Ticker Tape Header -->
+  <div class="ticker-wrap" id="ticker-container">
+    <div class="ticker" id="ticker-content">
+      <div class="ticker__item"><span class="pair">USD/BRL</span> <span class="rate" id="tick-USD-BRL-rate">5.4200</span> <span class="change down" id="tick-USD-BRL-change">-0.32%</span></div>
+      <div class="ticker__item"><span class="pair">EUR/BRL</span> <span class="rate" id="tick-EUR-BRL-rate">6.3100</span> <span class="change up" id="tick-EUR-BRL-change">+0.15%</span></div>
+      <div class="ticker__item"><span class="pair">USD/ARS Blue</span> <span class="rate" id="tick-USD-ARS_BLUE-rate">1420.00</span> <span class="change up" id="tick-USD-ARS_BLUE-change">+1.25%</span></div>
+      <div class="ticker__item"><span class="pair">USDT/ARS P2P</span> <span class="rate" id="tick-USDT-ARS_P2P-rate">1445.00</span> <span class="change up" id="tick-USDT-ARS_P2P-change">+0.85%</span></div>
+      <div class="ticker__item"><span class="pair">BRL/ARS</span> <span class="rate" id="tick-BRL-ARS-rate">261.99</span> <span class="change up" id="tick-BRL-ARS-change">+1.10%</span></div>
+      <div class="ticker__item"><span class="pair">CLP/BRL</span> <span class="rate">0.0057</span> <span class="change up">+0.05%</span></div>
+      <div class="ticker__item"><span class="pair">UYU/BRL</span> <span class="rate">0.1306</span> <span class="change up">+0.12%</span></div>
+
+      <!-- Duplicated for continuous infinite marquee loop -->
+      <div class="ticker__item"><span class="pair">USD/BRL</span> <span class="rate" id="tick-dup-USD-BRL-rate">5.4200</span> <span class="change down" id="tick-dup-USD-BRL-change">-0.32%</span></div>
+      <div class="ticker__item"><span class="pair">EUR/BRL</span> <span class="rate" id="tick-dup-EUR-BRL-rate">6.3100</span> <span class="change up" id="tick-dup-EUR-BRL-change">+0.15%</span></div>
+      <div class="ticker__item"><span class="pair">USD/ARS Blue</span> <span class="rate" id="tick-dup-USD-ARS_BLUE-rate">1420.00</span> <span class="change up" id="tick-dup-USD-ARS_BLUE-change">+1.25%</span></div>
+      <div class="ticker__item"><span class="pair">USDT/ARS P2P</span> <span class="rate" id="tick-dup-USDT-ARS_P2P-rate">1445.00</span> <span class="change up" id="tick-dup-USDT-ARS_P2P-change">+0.85%</span></div>
+      <div class="ticker__item"><span class="pair">BRL/ARS</span> <span class="rate" id="tick-dup-BRL-ARS-rate">261.99</span> <span class="change up" id="tick-dup-BRL-ARS-change">+1.10%</span></div>
+      <div class="ticker__item"><span class="pair">CLP/BRL</span> <span class="rate">0.0057</span> <span class="change up">+0.05%</span></div>
+      <div class="ticker__item"><span class="pair">UYU/BRL</span> <span class="rate">0.1306</span> <span class="change up">+0.12%</span></div>
+    </div>
+  </div>
+
   <div class="app-container">
     <header class="header">
       <a href="#" class="brand-group">
@@ -873,40 +858,6 @@
       <button class="nav-btn" data-tab="tab-cart">Smart Cart & Expenses</button>
       <button class="nav-btn" data-tab="tab-radar">Exchange Radar & Map</button>
       <button class="nav-btn" data-tab="tab-about">About & System</button>
-    </div>
-
-    <div class="ticker-bar" id="live-ticker-bar">
-      <div class="ticker-badge">
-        <span class="ticker-status-dot" id="ticker-status-dot"></span>
-        <span id="ticker-status-label">Live Feed</span>
-      </div>
-      <div class="ticker-items-track" id="ticker-track">
-        <div class="ticker-item" id="tick-USD-ARS_BLUE">
-          <span class="ticker-pair">USD/ARS Blue</span>
-          <span class="ticker-rate">1,420.00</span>
-          <span class="ticker-change up">+1.25%</span>
-        </div>
-        <div class="ticker-item" id="tick-USDT-ARS_P2P">
-          <span class="ticker-pair">USDT/ARS P2P</span>
-          <span class="ticker-rate">1,445.00</span>
-          <span class="ticker-change up">+0.85%</span>
-        </div>
-        <div class="ticker-item" id="tick-USD-BRL">
-          <span class="ticker-pair">USD/BRL</span>
-          <span class="ticker-rate">5.4200</span>
-          <span class="ticker-change down">-0.32%</span>
-        </div>
-        <div class="ticker-item" id="tick-EUR-BRL">
-          <span class="ticker-pair">EUR/BRL</span>
-          <span class="ticker-rate">6.3100</span>
-          <span class="ticker-change up">+0.15%</span>
-        </div>
-        <div class="ticker-item" id="tick-BRL-ARS">
-          <span class="ticker-pair">BRL/ARS</span>
-          <span class="ticker-rate">261.99</span>
-          <span class="ticker-change up">+1.10%</span>
-        </div>
-      </div>
     </div>
 
     <main>
@@ -1232,7 +1183,7 @@
               <li class="feature-item"><span>Fixed-Point Precision</span><strong>Decimal.js (80-bit Arithmetic)</strong></li>
               <li class="feature-item"><span>Offline Persistence</span><strong>Dexie.js IndexedDB v4</strong></li>
               <li class="feature-item"><span>Geospatial Radar & Routing</span><strong>OSM Overpass + OSRM Pedestrian</strong></li>
-              <li class="feature-item"><span>Live WebSocket Ticker</span><strong>Socket.io High Frequency Feed</strong></li>
+              <li class="feature-item"><span>Live WebSocket Ticker</span><strong id="about-ws-status">Operational (Checking feed...)</strong></li>
               <li class="feature-item"><span>AI Agent Protocol</span><strong>Model Context Protocol (MCP)</strong></li>
               <li class="feature-item"><span>Mobile Bridge</span><strong>Capacitor (iOS & Android)</strong></li>
             </ul>
@@ -1946,31 +1897,31 @@
 
     function applyTickerUpdates(updates) {
       updates.forEach(item => {
-        const elId = `tick-${item.pair.replace('/', '-').replace(' ', '_')}`;
-        const el = document.getElementById(elId);
-        if (el) {
-          const rateSpan = el.querySelector('.ticker-rate');
-          const changeSpan = el.querySelector('.ticker-change');
-          
-          if (rateSpan) {
-            rateSpan.textContent = item.rate >= 10 ? item.rate.toFixed(2) : item.rate.toFixed(4);
-          }
-          if (changeSpan) {
-            changeSpan.textContent = `${item.change24h >= 0 ? '+' : ''}${item.change24h.toFixed(2)}%`;
-            changeSpan.className = `ticker-change ${item.direction === 'up' ? 'up' : item.direction === 'down' ? 'down' : ''}`;
-          }
+        const pairKey = item.pair.replace('/', '-').replace(' ', '_');
+        const rateText = item.rate >= 10 ? item.rate.toFixed(2) : item.rate.toFixed(4);
+        const changeText = `${item.change24h >= 0 ? '+' : ''}${item.change24h.toFixed(2)}%`;
+        const changeClass = `change ${item.direction === 'up' ? 'up' : item.direction === 'down' ? 'down' : ''}`;
 
-          el.classList.remove('flash-up', 'flash-down');
-          void el.offsetWidth;
-          if (item.direction === 'up') el.classList.add('flash-up');
-          else if (item.direction === 'down') el.classList.add('flash-down');
+        const rateEl = document.getElementById(`tick-${pairKey}-rate`);
+        const changeEl = document.getElementById(`tick-${pairKey}-change`);
+        if (rateEl) rateEl.textContent = rateText;
+        if (changeEl) {
+          changeEl.textContent = changeText;
+          changeEl.className = changeClass;
+        }
+
+        const dupRateEl = document.getElementById(`tick-dup-${pairKey}-rate`);
+        const dupChangeEl = document.getElementById(`tick-dup-${pairKey}-change`);
+        if (dupRateEl) dupRateEl.textContent = rateText;
+        if (dupChangeEl) {
+          dupChangeEl.textContent = changeText;
+          dupChangeEl.className = changeClass;
         }
       });
     }
 
     function initWebSocketTicker() {
-      const statusLabel = document.getElementById('ticker-status-label');
-      const statusDot = document.getElementById('ticker-status-dot');
+      const aboutStatus = document.getElementById('about-ws-status');
 
       if (typeof io !== 'undefined') {
         try {
@@ -1981,8 +1932,7 @@
           });
 
           socket.on('connect', () => {
-            statusLabel.textContent = 'Live Feed (WS Connected)';
-            statusDot.style.backgroundColor = '#059669';
+            if (aboutStatus) aboutStatus.textContent = 'Operational (ivoyager-ticker-ws connected)';
           });
 
           socket.on('ticker:snapshot', (snapshot) => {
@@ -2006,10 +1956,8 @@
     }
 
     function startSimulatedTicker() {
-      const statusLabel = document.getElementById('ticker-status-label');
-      const statusDot = document.getElementById('ticker-status-dot');
-      statusLabel.textContent = 'Live Feed (High Frequency)';
-      statusDot.style.backgroundColor = '#059669';
+      const aboutStatus = document.getElementById('about-ws-status');
+      if (aboutStatus) aboutStatus.textContent = 'Operational (Client Simulation Mode)';
 
       const simulatedState = {
         'USD/ARS_BLUE': { rate: 1420.0, change: 1.25 },
