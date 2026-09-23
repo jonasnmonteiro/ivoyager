@@ -13,3 +13,5 @@ export * from './services/trip-tracker.service.js';
 export * from './services/geo-radar.service.js';
 export * from './services/ocr-parser.service.js';
 export * from './services/voice-command-parser.service.js';
+export * from './services/routing.service.js';
+export * from './services/custom-poi.service.js';
