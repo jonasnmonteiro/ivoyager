@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Offline-First Multi-Currency Financial Suite, VET Engine and Geospatial Travel Companion">
+  <title>iVoyager - Travel Financial Suite & VET Calculator</title>
+  <link rel="stylesheet" href="./styles/reset.css">
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/typography.css">
+  <style>
+    body {
+      background-color: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      font-family: var(--font-family-base);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4);
+      width: 100%;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space-6);
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--space-8);
+    }
+    .brand-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-brand);
+      letter-spacing: -0.02em;
+    }
+    .brand-subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-1);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      background-color: var(--color-success-bg);
+      color: var(--color-success-text);
+      border: 1px solid var(--color-success-border);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-6);
+    }
+    .card {
+      background-color: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-4);
+      color: var(--color-text-primary);
+    }
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+    .form-label {
+      display: block;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: var(--space-3);
+      background-color: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-base);
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--color-brand);
+    }
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      background-color: var(--color-brand);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+    .btn:hover {
+      background-color: var(--color-brand-hover);
+    }
+    .result-box {
+      margin-top: var(--space-4);
+      padding: var(--space-4);
+      background-color: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-2);
+      font-size: var(--font-size-sm);
+    }
+    .result-row:last-child {
+      margin-bottom: 0;
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--color-border);
+      font-weight: var(--font-weight-bold);
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .feature-item {
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+    }
+    .feature-item:last-child {
+      border-bottom: none;
+    }
+    .footer {
+      margin-top: auto;
+      padding: var(--space-6) 0;
+      text-align: center;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      border-top: 1px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div>
+        <h1 class="brand-title">iVoyager</h1>
+        <p class="brand-subtitle">Financial Suite, VET Engine and Travel Radar</p>
+      </div>
+      <span class="status-badge">Engine Active</span>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2 class="card-title">VET Tax Calculator</h2>
+        <div class="form-group">
+          <label class="form-label" for="vet-amount">Foreign Amount (USD / EUR)</label>
+          <input type="number" id="vet-amount" class="form-input" value="1000" min="1" step="any">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vet-rate">Commercial Rate (BRL)</label>
+          <input type="number" id="vet-rate" class="form-input" value="5.60" min="0.01" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="vet-method">Payment Instrument</label>
+          <select id="vet-method" class="form-select">
+            <option value="global_account">Global Account (IOF 1.10% + Spread 1.50%)</option>
+            <option value="credit_card">Traditional Card (IOF 4.38% + Spread 4.50%)</option>
+            <option value="cash">Cash in Person (IOF 1.10% + Spread 2.50%)</option>
+            <option value="crypto_p2p">Crypto P2P (IOF 0.00% + Spread 0.50%)</option>
+          </select>
+        </div>
+        <button id="vet-calc-btn" class="btn" type="button">Calculate Total Cost</button>
+        <div id="vet-result" class="result-box">
+          <div class="result-row"><span>Commercial Gross:</span><span id="res-gross">R$ 5,600.00</span></div>
+          <div class="result-row"><span>Bank Spread:</span><span id="res-spread">R$ 84.00</span></div>
+          <div class="result-row"><span>IOF Tax:</span><span id="res-iof">R$ 62.52</span></div>
+          <div class="result-row"><span>Effective VET Rate:</span><span id="res-vet">R$ 5.7465</span></div>
+          <div class="result-row"><span>Final Cost:</span><span id="res-total">R$ 5,746.52</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Currency Converter & Parallel Rates</h2>
+        <div class="form-group">
+          <label class="form-label" for="conv-amount">Amount</label>
+          <input type="number" id="conv-amount" class="form-input" value="100" min="1" step="any">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="conv-pair">Currency Pair</label>
+          <select id="conv-pair" class="form-select">
+            <option value="USD_BRL">USD to BRL (Commercial)</option>
+            <option value="USD_ARS_BLUE">USD to ARS (Dolar Blue)</option>
+            <option value="EUR_BRL">EUR to BRL (Commercial)</option>
+            <option value="BRL_CLP">BRL to CLP (Chilean Peso)</option>
+          </select>
+        </div>
+        <button id="conv-btn" class="btn" type="button">Convert</button>
+        <div id="conv-result" class="result-box">
+          <div class="result-row"><span>Source:</span><span id="conv-src">100.00 USD</span></div>
+          <div class="result-row"><span>Rate Applied:</span><span id="conv-rate">5.6000</span></div>
+          <div class="result-row"><span>Result:</span><span id="conv-dest">560.00 BRL</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">System Architecture</h2>
+        <ul class="feature-list">
+          <li class="feature-item"><span>Fixed-Point Engine</span><strong>Decimal.js (80-bit)</strong></li>
+          <li class="feature-item"><span>Offline Database</span><strong>Dexie.js IndexedDB</strong></li>
+          <li class="feature-item"><span>Geospatial Radar</span><strong>OSM Overpass + Haversine</strong></li>
+          <li class="feature-item"><span>AI Agent Integration</span><strong>Model Context Protocol (MCP)</strong></li>
+          <li class="feature-item"><span>Mobile Bridge</span><strong>Capacitor (iOS & Android)</strong></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>iVoyager Open Source Core &copy; 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    const rates = {
+      USD_BRL: { rate: 5.60, dest: 'BRL', src: 'USD' },
+      USD_ARS_BLUE: { rate: 1350.00, dest: 'ARS', src: 'USD' },
+      EUR_BRL: { rate: 6.15, dest: 'BRL', src: 'EUR' },
+      BRL_CLP: { rate: 168.50, dest: 'CLP', src: 'BRL' }
+    };
+
+    const methodConfigs = {
+      global_account: { iof: 0.011, spread: 0.015 },
+      credit_card: { iof: 0.0438, spread: 0.045 },
+      cash: { iof: 0.011, spread: 0.025 },
+      crypto_p2p: { iof: 0.0, spread: 0.005 }
+    };
+
+    function calculateVET() {
+      const amount = parseFloat(document.getElementById('vet-amount').value) || 0;
+      const baseRate = parseFloat(document.getElementById('vet-rate').value) || 0;
+      const method = document.getElementById('vet-method').value;
+      const config = methodConfigs[method] || methodConfigs.global_account;
+
+      const gross = amount * baseRate;
+      const spreadAmount = gross * config.spread;
+      const subtotal = gross + spreadAmount;
+      const iofAmount = subtotal * config.iof;
+      const total = subtotal + iofAmount;
+      const vet = amount > 0 ? (total / amount) : baseRate;
+
+      document.getElementById('res-gross').textContent = 'R$ ' + gross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('res-spread').textContent = 'R$ ' + spreadAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('res-iof').textContent = 'R$ ' + iofAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('res-vet').textContent = 'R$ ' + vet.toFixed(4);
+      document.getElementById('res-total').textContent = 'R$ ' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function convertCurrency() {
+      const amount = parseFloat(document.getElementById('conv-amount').value) || 0;
+      const pair = document.getElementById('conv-pair').value;
+      const data = rates[pair];
+
+      const total = amount * data.rate;
+      document.getElementById('conv-src').textContent = amount.toFixed(2) + ' ' + data.src;
+      document.getElementById('conv-rate').textContent = data.rate.toFixed(4);
+      document.getElementById('conv-dest').textContent = total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + data.dest;
+    }
+
+    document.getElementById('vet-calc-btn').addEventListener('click', calculateVET);
+    document.getElementById('conv-btn').addEventListener('click', convertCurrency);
+    calculateVET();
+    convertCurrency();
+  </script>
+</body>
+</html>
