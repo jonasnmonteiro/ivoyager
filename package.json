@@ -1,0 +1,19 @@
+{
+  "name": "ivoyager",
+  "version": "0.1.0",
+  "description": "Offline-First Multi-Currency Financial Suite, VET Engine & Geospatial Travel Companion",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test --import tsx src/app/core/**/*.test.ts"
+  },
+  "dependencies": {
+    "decimal.js": "^10.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
