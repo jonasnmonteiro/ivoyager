@@ -1,0 +1,65 @@
+:root {
+  --color-primary: #F7931E;
+  --color-primary-hover: #EA580C;
+  --color-primary-subtle: rgba(247, 147, 30, 0.12);
+  
+  --color-navy: #0A192F;
+  --color-navy-dark: #060B13;
+  --color-navy-card: #111C30;
+
+  --slate-900: #0F172A;
+  --slate-800: #1E293B;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748B;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50: #F8FAFC;
+  --white: #FFFFFF;
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #0284C7;
+  --color-whatsapp: #25D366;
+
+  --surface-bg: var(--slate-50);
+  --surface-card: var(--white);
+  --surface-header: var(--white);
+  --surface-footer: var(--color-navy);
+
+  --text-main: var(--slate-900);
+  --text-muted: var(--slate-600);
+  --text-subtle: var(--slate-400);
+
+  --border-subtle: var(--slate-200);
+  --border-strong: var(--slate-300);
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-card: 14px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="dark"] {
+  --surface-bg: var(--color-navy-dark);
+  --surface-card: var(--color-navy-card);
+  --surface-header: var(--color-navy);
+  --surface-footer: #020617;
+
+  --text-main: var(--slate-50);
+  --text-muted: var(--slate-400);
+  --text-subtle: var(--slate-500);
+
+  --border-subtle: #1E293B;
+  --border-strong: #334155;
+}
