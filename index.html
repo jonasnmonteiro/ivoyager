@@ -753,6 +753,82 @@
       color: var(--info);
     }
 
+    .guide-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .guide-badge.offline {
+      background-color: var(--success-subtle);
+      color: var(--success);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .guide-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .guide-pill {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .guide-pill.active, .guide-pill:hover {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    .sign-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .sign-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .alert-box {
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .alert-box.warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #B45309;
+    }
+
+    .alert-box.danger {
+      background-color: var(--danger-subtle);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: var(--danger);
+    }
+
     .footer {
       margin-top: auto;
       padding: 20px 0;
@@ -848,6 +924,7 @@
         <button class="nav-btn active" data-tab="tab-calculator">VET & Converter</button>
         <button class="nav-btn" data-tab="tab-cart">Smart Cart & Expenses</button>
         <button class="nav-btn" data-tab="tab-radar">Exchange Radar & Map</button>
+        <button class="nav-btn" data-tab="tab-guide">Pocket Guide & Signs</button>
         <button class="nav-btn" data-tab="tab-about">About & System</button>
       </nav>
 
@@ -858,6 +935,7 @@
       <button class="nav-btn active" data-tab="tab-calculator">VET & Converter</button>
       <button class="nav-btn" data-tab="tab-cart">Smart Cart & Expenses</button>
       <button class="nav-btn" data-tab="tab-radar">Exchange Radar & Map</button>
+      <button class="nav-btn" data-tab="tab-guide">Pocket Guide & Signs</button>
       <button class="nav-btn" data-tab="tab-about">About & System</button>
     </div>
 
@@ -1176,6 +1254,166 @@
         </div>
       </section>
 
+      <section id="tab-guide" class="tab-content">
+        <div class="grid">
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <h2 class="card-title" style="margin-bottom: 0;">Open Wikivoyage Travel Guide</h2>
+              <span class="guide-badge offline">Offline Pack Ready</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="guide-city-select">Select Destination Guide</label>
+              <select id="guide-city-select" class="form-select">
+                <option value="cordoba" selected>Cordoba, Argentina</option>
+                <option value="buenos_aires">Buenos Aires, Argentina</option>
+                <option value="mendoza">Mendoza, Argentina</option>
+                <option value="santiago">Santiago, Chile</option>
+              </select>
+            </div>
+
+            <div id="guide-content-area">
+              <p id="guide-city-summary" style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.6;"></p>
+
+              <div class="alert-box warning">
+                <strong style="display: block; margin-bottom: 4px;">Safety Advisories:</strong>
+                <ul id="guide-safety-list" style="margin-left: 18px; font-size: 12px; line-height: 1.5;"></ul>
+              </div>
+
+              <div class="alert-box danger">
+                <strong style="display: block; margin-bottom: 4px;">Common Local Scams:</strong>
+                <ul id="guide-scams-list" style="margin-left: 18px; font-size: 12px; line-height: 1.5;"></ul>
+              </div>
+
+              <div style="margin-top: 14px;">
+                <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px;">Emergency Contacts:</strong>
+                <div id="guide-emergency-contacts" class="feature-list"></div>
+              </div>
+
+              <div style="margin-top: 16px;">
+                <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px;">City Chapters:</strong>
+                <div id="guide-sections-container"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Offline Sign & Menu Translator</h2>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Instant on-device translator for South American road signs, transit terms, and restaurant menus.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="sign-search-input">Search Sign or Food Term</label>
+              <input type="text" id="sign-search-input" class="form-input" placeholder="Type sign text (e.g., Pare, Telepeaje, Cubierto, Bife)...">
+            </div>
+
+            <div class="guide-pill-group">
+              <button class="guide-pill active" data-category="all">All Terms</button>
+              <button class="guide-pill" data-category="traffic">Traffic Signs</button>
+              <button class="guide-pill" data-category="transit">Transit & Transport</button>
+              <button class="guide-pill" data-category="dining">Dining & Menus</button>
+              <button class="guide-pill" data-category="emergency">Emergency</button>
+            </div>
+
+            <div id="sign-results-container" style="max-height: 480px; overflow-y: auto; padding-right: 4px;"></div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Route Fuel & Highway Toll Calculator</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fuel-distance">Distance (km)</label>
+                <input type="number" id="fuel-distance" class="form-input" value="700" min="1" step="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="fuel-efficiency">Efficiency (L/100km)</label>
+                <input type="number" id="fuel-efficiency" class="form-input" value="8.5" min="0.1" step="0.1">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fuel-price">Fuel Price per Liter</label>
+                <input type="number" id="fuel-price" class="form-input" value="1150" min="0.01" step="0.01">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="fuel-currency">Fuel Currency</label>
+                <select id="fuel-currency" class="form-select">
+                  <option value="ARS" selected>ARS (Argentine Peso)</option>
+                  <option value="BRL">BRL (Brazilian Real)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="CLP">CLP (Chilean Peso)</option>
+                  <option value="UYU">UYU (Uruguayan Peso)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="fuel-corridor">Highway Toll Corridor</label>
+              <select id="fuel-corridor" class="form-select">
+                <option value="ruta_9" selected>Ruta 9: Buenos Aires - Rosario - Cordoba (700 km, ~4 Booths)</option>
+                <option value="ruta_7">Ruta 7: Buenos Aires - San Luis - Mendoza (1050 km, ~5 Booths)</option>
+                <option value="autovia_2">Autovia 2: Buenos Aires - Mar del Plata (400 km, ~2 Booths)</option>
+                <option value="ruta_68_cl">Ruta 68: Santiago - Valparaiso (120 km, ~2 Booths)</option>
+                <option value="custom">Custom Toll Amount</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="custom-toll-group" style="display: none;">
+              <label class="form-label" for="fuel-custom-toll">Custom Toll Total</label>
+              <input type="number" id="fuel-custom-toll" class="form-input" value="0" min="0">
+            </div>
+
+            <button type="button" id="calc-fuel-btn" class="btn" style="margin-bottom: 16px;">Calculate Route Costs</button>
+
+            <div class="result-box">
+              <div class="result-row">
+                <span>Fuel Required:</span>
+                <strong id="fuel-res-liters">59.50 Liters</strong>
+              </div>
+              <div class="result-row">
+                <span>Fuel Cost:</span>
+                <strong id="fuel-res-fuel-cost">ARS 68,425.00</strong>
+              </div>
+              <div class="result-row">
+                <span>Highway Tolls:</span>
+                <strong id="fuel-res-toll-cost">ARS 12,000.00</strong>
+              </div>
+              <div class="result-row total">
+                <span>Grand Route Total:</span>
+                <strong id="fuel-res-total-local">ARS 80,425.00</strong>
+              </div>
+              <div class="result-row" style="border-top: 1px dashed var(--border-subtle); padding-top: 8px; margin-top: 8px;">
+                <span>Converted to BRL:</span>
+                <strong id="fuel-res-total-brl" style="color: var(--primary);">R$ 307.00</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Airport Transit Hub Logistics</h2>
+            <div class="form-group">
+              <label class="form-label" for="airport-hub-select">Select International Airport</label>
+              <select id="airport-hub-select" class="form-select">
+                <option value="EZE" selected>EZE - Ministro Pistarini (Ezeiza, Buenos Aires)</option>
+                <option value="AEP">AEP - Aeroparque Jorge Newbery (Buenos Aires City)</option>
+                <option value="COR">COR - Ambrosio Taravella (Cordoba)</option>
+                <option value="SCL">SCL - Arturo Merino Benitez (Santiago, Chile)</option>
+              </select>
+            </div>
+
+            <div id="airport-hub-info" style="margin-bottom: 12px;">
+              <div class="feature-item" style="padding: 6px 0;">
+                <span>Distance to Center:</span>
+                <strong id="airport-distance">32 km southwest</strong>
+              </div>
+            </div>
+
+            <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px;">Ground Transport Options:</strong>
+            <div id="airport-transit-options" style="max-height: 380px; overflow-y: auto;"></div>
+          </div>
+        </div>
+      </section>
+
       <section id="tab-about" class="tab-content">
         <div class="grid">
           <div class="card">
@@ -1184,6 +1422,10 @@
               <li class="feature-item"><span>Fixed-Point Precision</span><strong>Decimal.js (80-bit Arithmetic)</strong></li>
               <li class="feature-item"><span>Offline Persistence</span><strong>Dexie.js IndexedDB v4</strong></li>
               <li class="feature-item"><span>Geospatial Radar & Routing</span><strong>OSM Overpass + OSRM Pedestrian</strong></li>
+              <li class="feature-item"><span>Travel Pocket Guide</span><strong>Wikivoyage Offline Packs</strong></li>
+              <li class="feature-item"><span>Offline Sign & Menu OCR</span><strong>On-Device Lexicon + Levenshtein</strong></li>
+              <li class="feature-item"><span>Highway Tolls & Mobility</span><strong>Cross-Border Fuel Matrix</strong></li>
+              <li class="feature-item"><span>Airport Transit Hubs</span><strong>Official Logistics (EZE, AEP, COR, SCL)</strong></li>
               <li class="feature-item"><span>Live WebSocket Ticker</span><strong id="about-ws-status">Operational (Checking feed...)</strong></li>
               <li class="feature-item"><span>AI Agent Protocol</span><strong>Model Context Protocol (MCP)</strong></li>
               <li class="feature-item"><span>Mobile Bridge</span><strong>Capacitor (iOS & Android)</strong></li>
@@ -1986,6 +2228,320 @@
       }, 2500);
     }
 
+    const wikivoyageGuides = {
+      cordoba: {
+        cityName: 'Cordoba',
+        country: 'Argentina',
+        summary: 'Argentinas second-largest city, known for its colonial Jesuit architecture, vibrant student population, and surrounding Sierras.',
+        safetyTips: [
+          'Keep valuables concealed in crowded peatonal walkways around 9 de Julio.',
+          'Avoid desolate streets in the immediate vicinity of the Rio Suquia after dark.',
+          'Use radio-taxis or registered remises at night.'
+        ],
+        localScams: [
+          'Mustard or ketchup spill distraction scam in central plazas.',
+          'Counterfeit 1000 and 2000 ARS banknotes given as change by informal vendors.'
+        ],
+        emergencyContacts: { Police: '911', Ambulance: '107 (SAME)', 'Tourist Police': '+54 351 434-2121' },
+        sections: [
+          { title: 'Understand', content: 'Founded in 1573, Cordoba is a major cultural and educational center. The historic Jesuit Block is a UNESCO World Heritage Site.' },
+          { title: 'Get around', content: 'Public transit uses the RedBus contactless card, purchasable at kiosks. Taxis and remises are widely available.' },
+          { title: 'See & Do', content: 'Visit Plaza San Martin, the historic Cathedral, Paseo del Buen Pastor in Nueva Cordoba, and the artisan fair in Guemes on weekends.' },
+          { title: 'Eat & Drink', content: 'Traditional Argentine asado, empanadas cordobesas (with sweet raisins and sugar crust), and Fernet with Coca-Cola.' }
+        ]
+      },
+      buenos_aires: {
+        cityName: 'Buenos Aires',
+        country: 'Argentina',
+        summary: 'The cosmopolitan capital of Argentina, celebrated for European architecture, tango, world-class gastronomy, and vibrant cultural barrios.',
+        safetyTips: [
+          'Remain vigilant for motorcycle snatch-thieves (motochorros) in San Telmo, La Boca, and Retiro.',
+          'Avoid wandering off the tourist Caminito strip in La Boca.',
+          'Only hail official Radio Taxi cabs or use Uber / Cabify.'
+        ],
+        localScams: [
+          'Mustard spray scam near Plaza de Mayo and Florida Street.',
+          'Taxi switch trick returning counterfeit 1000 ARS notes.'
+        ],
+        emergencyContacts: { Police: '911', Ambulance: '107 (SAME)', 'Tourist Police': '+54 11 5030-9920' },
+        sections: [
+          { title: 'Understand', content: 'Known as the Paris of South America with 48 diverse barrios including San Telmo, Recoleta, and Palermo.' },
+          { title: 'Get around', content: 'Extensive Subte underground metro and Colectivo buses using rechargeable SUBE card.' },
+          { title: 'See & Do', content: 'Teatro Colon, Recoleta Cemetery, Palermo Soho, and San Telmo Sunday antique market.' },
+          { title: 'Eat & Drink', content: 'Classic Parrillas (ojo de bife, bife de chorizo), medialunas, and Argentine Malbec.' }
+        ]
+      },
+      mendoza: {
+        cityName: 'Mendoza',
+        country: 'Argentina',
+        summary: 'Argentinas premier wine capital at the foot of the Andes, famous for Malbec vineyards, olive groves, and high-altitude mountaineering.',
+        safetyTips: [
+          'Keep backpacks secure along the central Av. San Martin commercial corridor.',
+          'Exercise caution during late evening hours around Parque General San Martin.'
+        ],
+        localScams: [
+          'Overcharging for wine tour packages at unlicensed kiosks near the bus terminal.'
+        ],
+        emergencyContacts: { Police: '911', Ambulance: '107', 'Tourist Police': '+54 261 413-2135' },
+        sections: [
+          { title: 'Understand', content: 'A desert oasis transformed by historical canal irrigation into a world wine capital.' },
+          { title: 'Get around', content: 'Tranvia Urbano light rail and buses using SUBE card. Wine routes require tour remises or bicycles.' },
+          { title: 'See & Do', content: 'Bodega winery tours in Lujan de Cuyo, Maipu, and Uco Valley; Aconcagua provincial park.' },
+          { title: 'Eat & Drink', content: 'Chivo al asador (roast goat), empanadas mendocinas, and award-winning Malbec.' }
+        ]
+      },
+      santiago: {
+        cityName: 'Santiago',
+        country: 'Chile',
+        summary: 'The dynamic capital of Chile, nestled between the snow-capped Andes mountains and coastal mountain range.',
+        safetyTips: [
+          'Beware of pickpockets on the Metro during rush hour (Line 1).',
+          'Avoid Plaza Baquedano/Italia during unscheduled street protests.',
+          'Keep belongings close in Bellavista nightlife district late at night.'
+        ],
+        localScams: [
+          'Rigged taxi meters and counterfeit 10,000 / 20,000 CLP bills returned as change.'
+        ],
+        emergencyContacts: { Police: '133 (Carabineros)', Ambulance: '131 (SAMU)', Fire: '132 (Bomberos)' },
+        sections: [
+          { title: 'Understand', content: 'Modern financial hub of the southern cone with historic civic centers.' },
+          { title: 'Get around', content: 'Clean and modern Metro subway and Red Movilidad buses using Bip! card.' },
+          { title: 'See & Do', content: 'Cerro San Cristobal, Sky Costanera observation deck, and historic Barrio Lastarria.' },
+          { title: 'Eat & Drink', content: 'Pastel de choclo, fresh Pacific seafood (machas a la parmesana), and Pisco Sour.' }
+        ]
+      }
+    };
+
+    function renderWikivoyageGuide(cityKey) {
+      const guide = wikivoyageGuides[cityKey] || wikivoyageGuides.cordoba;
+      document.getElementById('guide-city-summary').textContent = guide.summary;
+
+      const safetyList = document.getElementById('guide-safety-list');
+      safetyList.innerHTML = guide.safetyTips.map(tip => `<li>${tip}</li>`).join('');
+
+      const scamsList = document.getElementById('guide-scams-list');
+      scamsList.innerHTML = guide.localScams.map(scam => `<li>${scam}</li>`).join('');
+
+      const contactsContainer = document.getElementById('guide-emergency-contacts');
+      contactsContainer.innerHTML = Object.entries(guide.emergencyContacts).map(([name, num]) => `
+        <div class="feature-item" style="padding: 6px 0;">
+          <span>${name}:</span>
+          <strong>${num}</strong>
+        </div>
+      `).join('');
+
+      const sectionsContainer = document.getElementById('guide-sections-container');
+      sectionsContainer.innerHTML = guide.sections.map(sec => `
+        <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+          <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 4px;">${sec.title}</strong>
+          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${sec.content}</p>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('guide-city-select').addEventListener('change', (e) => {
+      renderWikivoyageGuide(e.target.value);
+    });
+
+    const signLexicon = [
+      { category: 'traffic', spanish: 'Pare', portuguese: 'Pare (Parada Obrigatória)', english: 'Stop', explanation: 'Mandatory full vehicle stop at junction or intersection.' },
+      { category: 'traffic', spanish: 'Ceda el paso', portuguese: 'Dê a preferência', english: 'Yield / Give Way', explanation: 'Slow down and yield right of way to crossing traffic.' },
+      { category: 'traffic', spanish: 'Telepeaje', portuguese: 'Pedágio Automático (Sem Parar / Tag)', english: 'Electronic Toll Collection (RFID)', explanation: 'Automatic toll lane reserved for vehicles with active windshield tags.' },
+      { category: 'traffic', spanish: 'Peaje', portuguese: 'Pedágio', english: 'Toll Booth', explanation: 'Highway toll payment plaza.' },
+      { category: 'traffic', spanish: 'Calzada resbaladiza', portuguese: 'Pista escorregadia', english: 'Slippery Road Surface', explanation: 'Warning of reduced traction in rain, ice, or gravel.' },
+      { category: 'traffic', spanish: 'Contramano', portuguese: 'Contramão (Sentido Proibido)', english: 'Wrong Way / No Entry', explanation: 'One-way street in the opposite direction. Do not enter.' },
+      { category: 'traffic', spanish: 'Velocidad máxima', portuguese: 'Velocidade máxima', english: 'Speed Limit', explanation: 'Maximum legal speed in kilometers per hour (km/h).' },
+      { category: 'traffic', spanish: 'Desvío', portuguese: 'Desvio', english: 'Detour', explanation: 'Temporary route redirection due to roadworks.' },
+      { category: 'transit', spanish: 'Boletería', portuguese: 'Bilheteria', english: 'Ticket Office', explanation: 'Counter for purchasing transit, bus, or train tickets.' },
+      { category: 'transit', spanish: 'Andén', portuguese: 'Plataforma / Cais', english: 'Platform', explanation: 'Train or intercity coach boarding platform.' },
+      { category: 'transit', spanish: 'Subte', portuguese: 'Metrô subterrâneo', english: 'Subway / Metro', explanation: 'Buenos Aires underground rapid transit system.' },
+      { category: 'transit', spanish: 'Colectivo', portuguese: 'Ônibus urbano', english: 'City Bus', explanation: 'Standard urban public transit bus.' },
+      { category: 'transit', spanish: 'Terminal de Ómnibus', portuguese: 'Rodoviária', english: 'Bus Terminal', explanation: 'Long-distance intercity coach station.' },
+      { category: 'transit', spanish: 'Migraciones', portuguese: 'Controle de Imigração', english: 'Immigration Control', explanation: 'Passport inspection checkpoint at borders.' },
+      { category: 'transit', spanish: 'Aduana', portuguese: 'Alfândega', english: 'Customs', explanation: 'Tax and baggage declaration checkpoint.' },
+      { category: 'dining', spanish: 'Cubierto', portuguese: 'Taxa de serviço / Couvert de mesa', english: 'Cover Charge (Table Fee)', explanation: 'Cover Charge / fixed per-person restaurant fee for bread, butter, and service (not a tip).' },
+      { category: 'dining', spanish: 'Propina', portuguese: 'Gorjeta', english: 'Tip / Gratuity', explanation: 'Customary tip for waitstaff, generally 10% in Argentina and Chile.' },
+      { category: 'dining', spanish: 'Bife de chorizo', portuguese: 'Contrafilé argentino', english: 'Sirloin / Strip Steak', explanation: 'Signature thick cut of tender Argentine beef.' },
+      { category: 'dining', spanish: 'Agua sin gas', portuguese: 'Água sem gás', english: 'Still Water', explanation: 'Non-carbonated bottled mineral water.' },
+      { category: 'dining', spanish: 'Agua con gas', portuguese: 'Água com gás', english: 'Sparkling Water', explanation: 'Carbonated bottled mineral water.' },
+      { category: 'emergency', spanish: 'Policía Turística', portuguese: 'Polícia Turística', english: 'Tourist Police', explanation: 'Specialized police division assisting foreign visitors.' },
+      { category: 'emergency', spanish: 'Farmacia de turno', portuguese: 'Farmácia de plantão 24h', english: 'On-Duty 24h Pharmacy', explanation: 'Designated rotating pharmacy open overnight.' },
+      { category: 'emergency', spanish: 'Guardia', portuguese: 'Pronto-Socorro / Emergência médica', english: 'Emergency Room', explanation: 'Hospital emergency intake and trauma unit.' }
+    ];
+
+    let currentSignCategory = 'all';
+
+    function renderSignTranslator() {
+      const query = (document.getElementById('sign-search-input').value || '').toLowerCase().trim();
+      const container = document.getElementById('sign-results-container');
+
+      const filtered = signLexicon.filter(item => {
+        const matchesCat = currentSignCategory === 'all' || item.category === currentSignCategory;
+        if (!matchesCat) return false;
+        if (!query) return true;
+        return item.spanish.toLowerCase().includes(query) ||
+               item.portuguese.toLowerCase().includes(query) ||
+               item.english.toLowerCase().includes(query) ||
+               item.explanation.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 16px;">No terms found matching your query.</p>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="sign-card">
+          <div class="sign-header">
+            <strong style="font-size: 14px; color: var(--text-main);">${item.spanish}</strong>
+            <span class="guide-badge" style="background: rgba(247, 147, 30, 0.12); color: var(--primary);">${item.category}</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+            <strong>PT:</strong> ${item.portuguese} &bull; <strong>EN:</strong> ${item.english}
+          </div>
+          <p style="font-size: 11px; color: var(--text-subtle); line-height: 1.4;">${item.explanation}</p>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('sign-search-input').addEventListener('input', renderSignTranslator);
+
+    document.querySelectorAll('.guide-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.guide-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentSignCategory = pill.getAttribute('data-category');
+        renderSignTranslator();
+      });
+    });
+
+    const tollCorridorPresets = {
+      ruta_9: { toll: 12000, distance: 700, currency: 'ARS' },
+      ruta_7: { toll: 18500, distance: 1050, currency: 'ARS' },
+      autovia_2: { toll: 8400, distance: 400, currency: 'ARS' },
+      ruta_68_cl: { toll: 7200, distance: 120, currency: 'CLP' },
+      custom: { toll: 0, distance: 700, currency: 'ARS' }
+    };
+
+    function updateCorridorPreset() {
+      const corridor = document.getElementById('fuel-corridor').value;
+      const customGroup = document.getElementById('custom-toll-group');
+      if (corridor === 'custom') {
+        customGroup.style.display = 'block';
+      } else {
+        customGroup.style.display = 'none';
+        const preset = tollCorridorPresets[corridor];
+        if (preset) {
+          document.getElementById('fuel-distance').value = preset.distance;
+          document.getElementById('fuel-currency').value = preset.currency;
+        }
+      }
+      calculateRouteMobility();
+    }
+
+    function calculateRouteMobility() {
+      const dist = parseFloat(document.getElementById('fuel-distance').value) || 0;
+      const eff = parseFloat(document.getElementById('fuel-efficiency').value) || 0;
+      const price = parseFloat(document.getElementById('fuel-price').value) || 0;
+      const curr = document.getElementById('fuel-currency').value;
+      const corridor = document.getElementById('fuel-corridor').value;
+
+      let tollCost = 0;
+      if (corridor === 'custom') {
+        tollCost = parseFloat(document.getElementById('fuel-custom-toll').value) || 0;
+      } else {
+        tollCost = tollCorridorPresets[corridor]?.toll || 0;
+      }
+
+      const liters = (dist * eff) / 100;
+      const fuelCost = liters * price;
+      const totalLocal = fuelCost + tollCost;
+
+      const rateToBrl = getCrossRate(curr, 'BRL');
+      const totalBrl = totalLocal * rateToBrl;
+
+      document.getElementById('fuel-res-liters').textContent = `${liters.toFixed(2)} Liters`;
+      document.getElementById('fuel-res-fuel-cost').textContent = `${curr} ${fuelCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('fuel-res-toll-cost').textContent = `${curr} ${tollCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('fuel-res-total-local').textContent = `${curr} ${totalLocal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('fuel-res-total-brl').textContent = `R$ ${totalBrl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    document.getElementById('fuel-corridor').addEventListener('change', updateCorridorPreset);
+    document.getElementById('calc-fuel-btn').addEventListener('click', calculateRouteMobility);
+    document.getElementById('fuel-distance').addEventListener('input', calculateRouteMobility);
+    document.getElementById('fuel-efficiency').addEventListener('input', calculateRouteMobility);
+    document.getElementById('fuel-price').addEventListener('input', calculateRouteMobility);
+    document.getElementById('fuel-currency').addEventListener('change', calculateRouteMobility);
+    document.getElementById('fuel-custom-toll').addEventListener('input', calculateRouteMobility);
+
+    const airportHubData = {
+      EZE: {
+        name: 'Ministro Pistarini International Airport (Ezeiza)',
+        city: 'Buenos Aires, Argentina',
+        distance: '32 km southwest of Downtown Buenos Aires',
+        options: [
+          { mode: 'Manuel Tienda Leon Coach', duration: '45-60 min', fare: 'ARS 12,500 (~USD 10)', details: 'Official express direct coach to Retiro terminal / Puerto Madero. Clean, air-conditioned, departures every 30 min.' },
+          { mode: 'Linea 8 Semirapido Bus', duration: '60-80 min', fare: 'ARS 950 (~USD 0.80)', details: 'Budget public transit bus direct to Plaza de Mayo and Congreso via highway. Requires SUBE card.' },
+          { mode: 'Official Airport Radio Taxi / Remis', duration: '40-55 min', fare: 'ARS 35,000 - 45,000 (~USD 30-40)', details: 'Pre-paid ticket booth inside arrivals terminal (Remis Transfer Express, Taxi Ezeiza). Avoid unlicensed solicitations.' }
+        ]
+      },
+      AEP: {
+        name: 'Aeroparque Jorge Newbery',
+        city: 'Buenos Aires, Argentina',
+        distance: '4 km northeast of Palermo / Downtown Buenos Aires',
+        options: [
+          { mode: 'ArBus / City Bus (Linea 33, 37, 45, 160)', duration: '20-35 min', fare: 'ARS 450 (~USD 0.40)', details: 'Direct public bus connections to Palermo, Plaza Italia, Retiro, and Microcentro. Requires SUBE card.' },
+          { mode: 'Official City Radio Taxi', duration: '15-25 min', fare: 'ARS 8,000 - 14,000 (~USD 7-12)', details: 'Official metered taxi rank outside Terminal A. Uber and Cabify pickup available at designated parking lane.' }
+        ]
+      },
+      COR: {
+        name: 'Ingeniero Ambrosio Taravella Airport (Pajas Blancas)',
+        city: 'Cordoba, Argentina',
+        distance: '10 km north of Cordoba City Center',
+        options: [
+          { mode: 'Aerobus Line 25', duration: '35-45 min', fare: 'ARS 1,800 (~USD 1.50)', details: 'Direct express public bus connecting Airport to Cordoba Bus Terminal (Terminal de Ómnibus) and Plaza San Martin. Requires RedBus card.' },
+          { mode: 'Official Auto-Remis & Radio Taxi', duration: '20-30 min', fare: 'ARS 12,000 - 18,000 (~USD 10-15)', details: 'Official counters inside arrival concourse (Auto-Remis Cordoba). Metered and flat rates.' }
+        ]
+      },
+      SCL: {
+        name: 'Arturo Merino Benitez International Airport',
+        city: 'Santiago, Chile',
+        distance: '17 km northwest of Santiago Downtown',
+        options: [
+          { mode: 'Centropuerto & Turbus Airport Shuttle', duration: '30-45 min', fare: 'CLP 2,200 (~USD 2.40)', details: 'Frequent express coaches connecting airport to Metro stations Pajaritos and Los Heroes (Line 1). Every 10 min.' },
+          { mode: 'Official Taxi Oficial / Taxi Basico', duration: '25-35 min', fare: 'CLP 22,000 - 28,000 (~USD 24-30)', details: 'Authorized reservation desks inside arrival baggage hall. Avoid informal drivers outside the terminal.' }
+        ]
+      }
+    };
+
+    function renderAirportHub(hubKey) {
+      const hub = airportHubData[hubKey] || airportHubData.EZE;
+      document.getElementById('airport-distance').textContent = hub.distance;
+
+      const container = document.getElementById('airport-transit-options');
+      container.innerHTML = hub.options.map(opt => `
+        <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 13px; color: var(--text-main);">${opt.mode}</strong>
+            <span class="guide-badge" style="background: rgba(5, 150, 105, 0.12); color: var(--success);">${opt.duration}</span>
+          </div>
+          <div style="font-size: 12px; color: var(--primary); font-weight: 600; margin-bottom: 4px;">
+            Est. Fare: ${opt.fare}
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">${opt.details}</p>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('airport-hub-select').addEventListener('change', (e) => {
+      renderAirportHub(e.target.value);
+    });
+
+    renderWikivoyageGuide('cordoba');
+    renderSignTranslator();
+    calculateRouteMobility();
+    renderAirportHub('EZE');
     updateVetDefaultRate();
     convertUniversalCrossRate();
     initMap();
