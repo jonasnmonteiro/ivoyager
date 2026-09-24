@@ -152,7 +152,7 @@ ivoyager/
 ├── src/
 │   ├── index.html            # Core HTML template
 │   ├── main.ts               # Application bootstrap
-│   ├── styles/               # Design tokens (tokens.css, typography.css)
+│   ├── styles/               # Modular stylesheets (reset.css, tokens.css, typography.css, app.css)
 │   ├── app/
 │   │   ├── core/             # Models, services, fixed-point math, and IndexedDB
 │   │   │   ├── services/     # Wikivoyage, SignTranslator, Mobility, FlightTransit, VET, Radar
