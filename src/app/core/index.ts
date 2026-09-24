@@ -15,3 +15,7 @@ export * from './services/ocr-parser.service.js';
 export * from './services/voice-command-parser.service.js';
 export * from './services/routing.service.js';
 export * from './services/custom-poi.service.js';
+export * from './services/wikivoyage.service.js';
+export * from './services/sign-translator.service.js';
+export * from './services/mobility.service.js';
+export * from './services/flight-transit.service.js';
