@@ -1,4 +1,29 @@
-const baseRatesToUsd = {
+// iVoyager - Main Application Controller (TypeScript)
+// Handles UI reactivity, Leaflet mapping, VET & Cross-rate calculation, Smart Cart,
+// Travel Guide rendering, Sign Lexicon & OCR, Fuel Matrix, and WebSocket Live Ticker.
+
+declare const L: any;
+declare const io: any;
+declare const Tesseract: any;
+
+declare global {
+  interface Window {
+    deleteCartItem?: (index: number) => void;
+    traceWalkingRoute?: (destLat: number, destLon: number, destName: string) => Promise<void>;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 1. Currency & Payment Method Definitions
+// ---------------------------------------------------------------------------
+
+interface MethodConfig {
+  name: string;
+  iof: number;
+  spread: number;
+}
+
+const baseRatesToUsd: Record<string, number> = {
   USD: 1.0,
   BRL: 5.42,
   EUR: 0.859,
@@ -12,7 +37,7 @@ const baseRatesToUsd = {
   USDT: 1.0
 };
 
-const currencyLabels = {
+const currencyLabels: Record<string, string> = {
   USD: 'USD',
   BRL: 'BRL',
   EUR: 'EUR',
@@ -26,33 +51,50 @@ const currencyLabels = {
   USDT: 'USDT'
 };
 
-const methodConfigs = {
+const methodConfigs: Record<string, MethodConfig> = {
   global_account: { name: 'Global Account', iof: 0.011, spread: 0.015 },
   credit_card: { name: 'Traditional Card', iof: 0.0438, spread: 0.045 },
   cash: { name: 'Cash in Person', iof: 0.011, spread: 0.025 },
   crypto_p2p: { name: 'Crypto P2P', iof: 0.0, spread: 0.005 }
 };
 
-function getCrossRate(fromCode, toCode) {
+function getCrossRate(fromCode: string, toCode: string): number {
   const fromUsd = baseRatesToUsd[fromCode] || 1.0;
   const toUsd = baseRatesToUsd[toCode] || 1.0;
   return toUsd / fromUsd;
 }
 
-function updateVetDefaultRate() {
-  const home = document.getElementById('vet-home-currency').value;
-  const target = document.getElementById('vet-target-currency').value;
+// ---------------------------------------------------------------------------
+// 2. VET & Universal Cross-Rate Calculator
+// ---------------------------------------------------------------------------
+
+function updateVetDefaultRate(): void {
+  const homeEl = document.getElementById('vet-home-currency') as HTMLSelectElement | null;
+  const targetEl = document.getElementById('vet-target-currency') as HTMLSelectElement | null;
+  const rateEl = document.getElementById('vet-exchange-rate') as HTMLInputElement | null;
+  if (!homeEl || !targetEl || !rateEl) return;
+
+  const home = homeEl.value;
+  const target = targetEl.value;
   const rate = getCrossRate(home, target);
-  document.getElementById('vet-exchange-rate').value = rate >= 1 ? rate.toFixed(2) : rate.toFixed(6);
+  rateEl.value = rate >= 1 ? rate.toFixed(2) : rate.toFixed(6);
   calculateVET();
 }
 
-function calculateVET() {
-  const homeCurr = document.getElementById('vet-home-currency').value;
-  const targetCurr = document.getElementById('vet-target-currency').value;
-  const foreignAmount = parseFloat(document.getElementById('vet-foreign-amount').value) || 0;
-  const rate = parseFloat(document.getElementById('vet-exchange-rate').value) || 1;
-  const method = document.getElementById('vet-payment-method').value;
+function calculateVET(): void {
+  const homeEl = document.getElementById('vet-home-currency') as HTMLSelectElement | null;
+  const targetEl = document.getElementById('vet-target-currency') as HTMLSelectElement | null;
+  const foreignAmountEl = document.getElementById('vet-foreign-amount') as HTMLInputElement | null;
+  const exchangeRateEl = document.getElementById('vet-exchange-rate') as HTMLInputElement | null;
+  const paymentMethodEl = document.getElementById('vet-payment-method') as HTMLSelectElement | null;
+
+  if (!homeEl || !targetEl || !foreignAmountEl || !exchangeRateEl || !paymentMethodEl) return;
+
+  const homeCurr = homeEl.value;
+  const targetCurr = targetEl.value;
+  const foreignAmount = parseFloat(foreignAmountEl.value) || 0;
+  const rate = parseFloat(exchangeRateEl.value) || 1;
+  const method = paymentMethodEl.value;
   const config = methodConfigs[method] || methodConfigs.global_account;
 
   const grossInHome = rate > 0 ? (foreignAmount / rate) : 0;
@@ -62,17 +104,29 @@ function calculateVET() {
   const totalInHome = subtotal + iofAmount;
   const effectiveVetRate = foreignAmount > 0 ? (totalInHome / foreignAmount) : (1 / rate);
 
-  document.getElementById('res-gross').textContent = `${homeCurr} ${grossInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('res-spread').textContent = `${homeCurr} ${spreadAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('res-iof').textContent = `${homeCurr} ${iofAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('res-vet').textContent = `${homeCurr} ${effectiveVetRate.toFixed(6)} per ${currencyLabels[targetCurr]}`;
-  document.getElementById('res-total').textContent = `${homeCurr} ${totalInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const resGross = document.getElementById('res-gross');
+  const resSpread = document.getElementById('res-spread');
+  const resIof = document.getElementById('res-iof');
+  const resVet = document.getElementById('res-vet');
+  const resTotal = document.getElementById('res-total');
+
+  if (resGross) resGross.textContent = `${homeCurr} ${grossInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resSpread) resSpread.textContent = `${homeCurr} ${spreadAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resIof) resIof.textContent = `${homeCurr} ${iofAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resVet) resVet.textContent = `${homeCurr} ${effectiveVetRate.toFixed(6)} per ${currencyLabels[targetCurr] || targetCurr}`;
+  if (resTotal) resTotal.textContent = `${homeCurr} ${totalInHome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function convertUniversalCrossRate() {
-  const amount = parseFloat(document.getElementById('conv-amount').value) || 0;
-  const from = document.getElementById('conv-from').value;
-  const to = document.getElementById('conv-to').value;
+function convertUniversalCrossRate(): void {
+  const amountEl = document.getElementById('conv-amount') as HTMLInputElement | null;
+  const fromEl = document.getElementById('conv-from') as HTMLSelectElement | null;
+  const toEl = document.getElementById('conv-to') as HTMLSelectElement | null;
+
+  if (!amountEl || !fromEl || !toEl) return;
+
+  const amount = parseFloat(amountEl.value) || 0;
+  const from = fromEl.value;
+  const to = toEl.value;
 
   const rate = getCrossRate(from, to);
   const invRate = getCrossRate(to, from);
@@ -85,21 +139,32 @@ function convertUniversalCrossRate() {
     typeBadge = 'Crypto P2P Stablecoin';
   }
 
-  document.getElementById('conv-src').textContent = `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[from]}`;
-  document.getElementById('conv-rate').textContent = `1 ${currencyLabels[from]} = ${rate >= 1 ? rate.toFixed(4) : rate.toFixed(6)} ${currencyLabels[to]}`;
-  document.getElementById('conv-inv-rate').textContent = `1 ${currencyLabels[to]} = ${invRate >= 1 ? invRate.toFixed(4) : invRate.toFixed(6)} ${currencyLabels[from]}`;
-  document.getElementById('conv-type').textContent = typeBadge;
-  document.getElementById('conv-dest').textContent = `${convertedTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[to]}`;
+  const convSrc = document.getElementById('conv-src');
+  const convRate = document.getElementById('conv-rate');
+  const convInvRate = document.getElementById('conv-inv-rate');
+  const convType = document.getElementById('conv-type');
+  const convDest = document.getElementById('conv-dest');
+
+  if (convSrc) convSrc.textContent = `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[from] || from}`;
+  if (convRate) convRate.textContent = `1 ${currencyLabels[from] || from} = ${rate >= 1 ? rate.toFixed(4) : rate.toFixed(6)} ${currencyLabels[to] || to}`;
+  if (convInvRate) convInvRate.textContent = `1 ${currencyLabels[to] || to} = ${invRate >= 1 ? invRate.toFixed(4) : invRate.toFixed(6)} ${currencyLabels[from] || from}`;
+  if (convType) convType.textContent = typeBadge;
+  if (convDest) convDest.textContent = `${convertedTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currencyLabels[to] || to}`;
 }
 
-function swapCurrencies() {
-  const fromSelect = document.getElementById('conv-from');
-  const toSelect = document.getElementById('conv-to');
+function swapCurrencies(): void {
+  const fromSelect = document.getElementById('conv-from') as HTMLSelectElement | null;
+  const toSelect = document.getElementById('conv-to') as HTMLSelectElement | null;
+  if (!fromSelect || !toSelect) return;
   const temp = fromSelect.value;
   fromSelect.value = toSelect.value;
   toSelect.value = temp;
   convertUniversalCrossRate();
 }
+
+// ---------------------------------------------------------------------------
+// 3. Navigation & Tab Switching
+// ---------------------------------------------------------------------------
 
 const navButtons = document.querySelectorAll('.nav-btn');
 const tabContents = document.querySelectorAll('.tab-content');
@@ -115,6 +180,7 @@ if (hamburgerToggle && mobileMenu) {
 navButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     const targetTab = btn.getAttribute('data-tab');
+    if (!targetTab) return;
     navButtons.forEach(b => b.classList.remove('active'));
     document.querySelectorAll(`[data-tab="${targetTab}"]`).forEach(b => b.classList.add('active'));
     tabContents.forEach(content => content.classList.remove('active'));
@@ -128,19 +194,40 @@ navButtons.forEach(btn => {
   });
 });
 
-let cartItems = [];
+// ---------------------------------------------------------------------------
+// 4. Smart Cart & Split Expenses
+// ---------------------------------------------------------------------------
 
-function renderCart() {
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  currency: string;
+  method: string;
+  grossBrl: number;
+  finalBrl: number;
+}
+
+let cartItems: CartItem[] = [];
+
+function renderCart(): void {
   const tbody = document.getElementById('cart-items-body');
   if (!tbody) return;
 
+  const totalItemsEl = document.getElementById('cart-total-items');
+  const grossBrlEl = document.getElementById('cart-gross-brl');
+  const taxBrlEl = document.getElementById('cart-tax-brl');
+  const finalBrlEl = document.getElementById('cart-final-brl');
+  const splitPerPersonEl = document.getElementById('split-per-person');
+
   if (cartItems.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No items added yet. Add a product above to start calculating!</td></tr>';
-    document.getElementById('cart-total-items').textContent = '0 items';
-    document.getElementById('cart-gross-brl').textContent = 'R$ 0.00';
-    document.getElementById('cart-tax-brl').textContent = 'R$ 0.00';
-    document.getElementById('cart-final-brl').textContent = 'R$ 0.00';
-    document.getElementById('split-per-person').textContent = 'R$ 0.00';
+    if (totalItemsEl) totalItemsEl.textContent = '0 items';
+    if (grossBrlEl) grossBrlEl.textContent = 'R$ 0.00';
+    if (taxBrlEl) taxBrlEl.textContent = 'R$ 0.00';
+    if (finalBrlEl) finalBrlEl.textContent = 'R$ 0.00';
+    if (splitPerPersonEl) splitPerPersonEl.textContent = 'R$ 0.00';
     return;
   }
 
@@ -158,8 +245,8 @@ function renderCart() {
     row.innerHTML = `
       <td><strong>${item.name}</strong></td>
       <td class="mono-cell">${item.quantity}</td>
-      <td class="mono-cell">${item.price.toFixed(2)} ${currencyLabels[item.currency]}</td>
-      <td><span class="tag-badge">${methodConfigs[item.method].name}</span></td>
+      <td class="mono-cell">${item.price.toFixed(2)} ${currencyLabels[item.currency] || item.currency}</td>
+      <td><span class="tag-badge">${methodConfigs[item.method]?.name || item.method}</span></td>
       <td class="mono-cell" style="color: var(--primary-dark);">R$ ${item.finalBrl.toFixed(2)}</td>
       <td><button class="btn btn-danger" onclick="deleteCartItem(${index})">Remove</button></td>
     `;
@@ -167,22 +254,31 @@ function renderCart() {
   });
 
   const totalTax = totalFinal - totalGross;
-  const people = parseInt(document.getElementById('split-people').value) || 1;
+  const splitInput = document.getElementById('split-people') as HTMLInputElement | null;
+  const people = parseInt(splitInput?.value || '1', 10) || 1;
   const perPerson = totalFinal / people;
 
-  document.getElementById('cart-total-items').textContent = totalCount + (totalCount === 1 ? ' item' : ' items');
-  document.getElementById('cart-gross-brl').textContent = 'R$ ' + totalGross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('cart-tax-brl').textContent = 'R$ ' + totalTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('cart-final-brl').textContent = 'R$ ' + totalFinal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('split-per-person').textContent = 'R$ ' + perPerson.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (totalItemsEl) totalItemsEl.textContent = totalCount + (totalCount === 1 ? ' item' : ' items');
+  if (grossBrlEl) grossBrlEl.textContent = 'R$ ' + totalGross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (taxBrlEl) taxBrlEl.textContent = 'R$ ' + totalTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (finalBrlEl) finalBrlEl.textContent = 'R$ ' + totalFinal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (splitPerPersonEl) splitPerPersonEl.textContent = 'R$ ' + perPerson.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function addCartItem() {
-  const name = document.getElementById('item-name').value.trim() || 'Trip Purchase';
-  const price = parseFloat(document.getElementById('item-price').value) || 0;
-  const quantity = parseInt(document.getElementById('item-qty').value) || 1;
-  const currency = document.getElementById('item-curr').value;
-  const method = document.getElementById('item-method').value;
+function addCartItem(): void {
+  const nameEl = document.getElementById('item-name') as HTMLInputElement | null;
+  const priceEl = document.getElementById('item-price') as HTMLInputElement | null;
+  const qtyEl = document.getElementById('item-qty') as HTMLInputElement | null;
+  const currEl = document.getElementById('item-curr') as HTMLSelectElement | null;
+  const methodEl = document.getElementById('item-method') as HTMLSelectElement | null;
+
+  if (!nameEl || !priceEl || !qtyEl || !currEl || !methodEl) return;
+
+  const name = nameEl.value.trim() || 'Trip Purchase';
+  const price = parseFloat(priceEl.value) || 0;
+  const quantity = parseInt(qtyEl.value, 10) || 1;
+  const currency = currEl.value;
+  const method = methodEl.value;
 
   if (price <= 0) {
     alert('Please enter a valid price for the item.');
@@ -208,24 +304,24 @@ function addCartItem() {
     finalBrl
   });
 
-  document.getElementById('item-name').value = '';
-  document.getElementById('item-price').value = '';
-  document.getElementById('item-qty').value = '1';
+  nameEl.value = '';
+  priceEl.value = '';
+  qtyEl.value = '1';
   renderCart();
 }
 
-function deleteCartItem(index) {
+function deleteCartItem(index: number): void {
   cartItems.splice(index, 1);
   renderCart();
 }
 window.deleteCartItem = deleteCartItem;
 
-function clearCart() {
+function clearCart(): void {
   cartItems = [];
   renderCart();
 }
 
-function exportCsv() {
+function exportCsv(): void {
   if (cartItems.length === 0) {
     alert('No items in the shopping cart to export.');
     return;
@@ -233,7 +329,7 @@ function exportCsv() {
 
   let csv = 'Product Name,Quantity,Original Price,Currency,Payment Method,Final BRL (with VET)\n';
   cartItems.forEach(item => {
-    csv += `"${item.name}",${item.quantity},${item.price.toFixed(2)},${currencyLabels[item.currency]},"${methodConfigs[item.method].name}",${item.finalBrl.toFixed(2)}\n`;
+    csv += `"${item.name}",${item.quantity},${item.price.toFixed(2)},${currencyLabels[item.currency] || item.currency},"${methodConfigs[item.method]?.name || item.method}",${item.finalBrl.toFixed(2)}\n`;
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -257,15 +353,46 @@ if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportCsv);
 const splitPeopleInput = document.getElementById('split-people');
 if (splitPeopleInput) splitPeopleInput.addEventListener('input', renderCart);
 
-let mapInstance = null;
-let markersLayer = null;
-let routePolyline = null;
+// ---------------------------------------------------------------------------
+// 5. Exchange Radar & Leaflet Geolocation
+// ---------------------------------------------------------------------------
+
+interface ExchangeSpot {
+  name: string;
+  type: string;
+  lat: number;
+  lon: number;
+  address: string;
+  isCustom?: boolean;
+  distanceMeters?: number;
+}
+
+interface CityHub {
+  name: string;
+  lat: number;
+  lon: number;
+  spots: ExchangeSpot[];
+}
+
+interface CustomPoi {
+  id: string;
+  name: string;
+  category: string;
+  lat: number;
+  lon: number;
+  notes: string;
+  createdAt: number;
+}
+
+let mapInstance: any = null;
+let markersLayer: any = null;
+let routePolyline: any = null;
 let currentUserCoords = { lat: -31.4167, lon: -64.1833 };
-let customPoiList = [];
+let customPoiList: CustomPoi[] = [];
 let isPinDropperActive = false;
 
 const savedPoisStorageKey = 'ivoyager_custom_pois';
-function loadSavedPois() {
+function loadSavedPois(): void {
   try {
     const stored = localStorage.getItem(savedPoisStorageKey);
     if (stored) {
@@ -276,14 +403,14 @@ function loadSavedPois() {
   }
 }
 
-function saveCustomPoisLocally() {
+function saveCustomPoisLocally(): void {
   try {
     localStorage.setItem(savedPoisStorageKey, JSON.stringify(customPoiList));
   } catch {
   }
 }
 
-const cityHubs = {
+const cityHubs: Record<string, CityHub> = {
   cordoba: {
     name: 'Cordoba (Plaza San Martin & Peatonal)',
     lat: -31.4167,
@@ -368,7 +495,7 @@ const cityHubs = {
   }
 };
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371e3;
   const phi1 = lat1 * Math.PI / 180;
   const phi2 = lat2 * Math.PI / 180;
@@ -382,7 +509,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-function initMap() {
+function initMap(): void {
   const mapEl = document.getElementById('map');
   if (!mapEl || typeof L === 'undefined') return;
 
@@ -397,22 +524,25 @@ function initMap() {
 
   markersLayer = L.layerGroup().addTo(mapInstance);
 
-  mapInstance.on('click', (e) => {
+  mapInstance.on('click', (e: any) => {
     if (isPinDropperActive) {
-      document.getElementById('custom-poi-lat').value = e.latlng.lat.toFixed(6);
-      document.getElementById('custom-poi-lon').value = e.latlng.lng.toFixed(6);
-      document.getElementById('poi-creator-panel').classList.add('visible');
+      const latInput = document.getElementById('custom-poi-lat') as HTMLInputElement | null;
+      const lonInput = document.getElementById('custom-poi-lon') as HTMLInputElement | null;
+      const panel = document.getElementById('poi-creator-panel');
+      if (latInput) latInput.value = e.latlng.lat.toFixed(6);
+      if (lonInput) lonInput.value = e.latlng.lng.toFixed(6);
+      if (panel) panel.classList.add('visible');
     }
   });
 
   updateRadarView('cordoba');
 }
 
-async function traceWalkingRoute(destLat, destLon, destName) {
+async function traceWalkingRoute(destLat: number, destLon: number, destName: string): Promise<void> {
   const origin = currentUserCoords;
   const osrmUrl = `https://router.project-osrm.org/route/v1/walking/${origin.lon},${origin.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
 
-  let routeCoords = [[origin.lat, origin.lon], [destLat, destLon]];
+  let routeCoords: [number, number][] = [[origin.lat, origin.lon], [destLat, destLon]];
   let distanceMeters = Math.round(calculateDistance(origin.lat, origin.lon, destLat, destLon));
   let durationMinutes = Math.max(1, Math.round((distanceMeters / (4500 / 60))));
 
@@ -424,7 +554,7 @@ async function traceWalkingRoute(destLat, destLon, destName) {
         const r = data.routes[0];
         distanceMeters = Math.round(r.distance);
         durationMinutes = Math.max(1, Math.round(r.duration / 60));
-        routeCoords = r.geometry.coordinates.map(c => [c[1], c[0]]);
+        routeCoords = r.geometry.coordinates.map((c: [number, number]) => [c[1], c[0]]);
       }
     }
   } catch {
@@ -448,19 +578,26 @@ async function traceWalkingRoute(destLat, destLon, destName) {
   const routePanel = document.getElementById('route-info-panel');
   if (routePanel) {
     routePanel.classList.add('visible');
-    document.getElementById('route-destination-title').textContent = `Walking Route to: ${destName}`;
-    document.getElementById('route-metric-distance').textContent = `Distance: ${distanceMeters < 1000 ? distanceMeters + ' m' : (distanceMeters / 1000).toFixed(2) + ' km'}`;
-    document.getElementById('route-metric-duration').textContent = `Estimated: ~${durationMinutes} min walk`;
+    const titleEl = document.getElementById('route-destination-title');
+    const distEl = document.getElementById('route-metric-distance');
+    const durEl = document.getElementById('route-metric-duration');
+    const gmapLink = document.getElementById('link-google-maps') as HTMLAnchorElement | null;
+    const appleLink = document.getElementById('link-apple-maps') as HTMLAnchorElement | null;
+    const wazeLink = document.getElementById('link-waze') as HTMLAnchorElement | null;
+
+    if (titleEl) titleEl.textContent = `Walking Route to: ${destName}`;
+    if (distEl) distEl.textContent = `Distance: ${distanceMeters < 1000 ? distanceMeters + ' m' : (distanceMeters / 1000).toFixed(2) + ' km'}`;
+    if (durEl) durEl.textContent = `Estimated: ~${durationMinutes} min walk`;
 
     const encodedName = encodeURIComponent(destName);
-    document.getElementById('link-google-maps').href = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lon}&destination=${destLat},${destLon}&travelmode=walking`;
-    document.getElementById('link-apple-maps').href = `https://maps.apple.com/?saddr=${origin.lat},${origin.lon}&daddr=${destLat},${destLon}&dirflg=w&q=${encodedName}`;
-    document.getElementById('link-waze').href = `https://waze.com/ul?ll=${destLat},${destLon}&navigate=yes`;
+    if (gmapLink) gmapLink.href = `https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lon}&destination=${destLat},${destLon}&travelmode=walking`;
+    if (appleLink) appleLink.href = `https://maps.apple.com/?saddr=${origin.lat},${origin.lon}&daddr=${destLat},${destLon}&dirflg=w&q=${encodedName}`;
+    if (wazeLink) wazeLink.href = `https://waze.com/ul?ll=${destLat},${destLon}&navigate=yes`;
   }
 }
 window.traceWalkingRoute = traceWalkingRoute;
 
-function clearRoute() {
+function clearRoute(): void {
   if (routePolyline && mapInstance) {
     mapInstance.removeLayer(routePolyline);
     routePolyline = null;
@@ -472,10 +609,10 @@ function clearRoute() {
 const clearRouteBtn = document.getElementById('clear-route-btn');
 if (clearRouteBtn) clearRouteBtn.addEventListener('click', clearRoute);
 
-function updateRadarView(cityKey, userLocation = null) {
+function updateRadarView(cityKey: string | null, userLocation: { lat: number; lon: number } | null = null): void {
   if (!markersLayer || !mapInstance) return;
 
-  const hub = cityHubs[cityKey];
+  const hub = cityKey ? cityHubs[cityKey] : null;
   markersLayer.clearLayers();
   clearRoute();
 
@@ -490,7 +627,7 @@ function updateRadarView(cityKey, userLocation = null) {
       .bindPopup('<strong>Your Location (Origin)</strong>').openPopup();
   }
 
-  let spots = hub ? [...hub.spots] : [
+  const spots: ExchangeSpot[] = hub ? [...hub.spots] : [
     { name: 'City Center Bureau de Change', type: 'Bureau de Change', lat: centerLat + 0.0015, lon: centerLon + 0.0012, address: 'Central Avenue' },
     { name: 'Western Union Agent', type: 'Western Union Agent', lat: centerLat - 0.0018, lon: centerLon - 0.0010, address: 'Main Plaza' },
     { name: 'International ATM Bank', type: 'Bank / ATM', lat: centerLat + 0.0022, lon: centerLon - 0.0015, address: 'Financial District' }
@@ -507,10 +644,10 @@ function updateRadarView(cityKey, userLocation = null) {
     });
   });
 
-  const spotsWithDistance = spots.map(spot => {
+  const spotsWithDistance: ExchangeSpot[] = spots.map(spot => {
     const dist = calculateDistance(centerLat, centerLon, spot.lat, spot.lon);
     return { ...spot, distanceMeters: dist };
-  }).sort((a, b) => a.distanceMeters - b.distanceMeters);
+  }).sort((a, b) => (a.distanceMeters || 0) - (b.distanceMeters || 0));
 
   const container = document.getElementById('radar-spots-container');
   if (!container) return;
@@ -530,9 +667,10 @@ function updateRadarView(cityKey, userLocation = null) {
     `;
     marker.bindPopup(popupContent);
 
-    const distText = spot.distanceMeters < 1000 
-      ? `${Math.round(spot.distanceMeters)}m` 
-      : `${(spot.distanceMeters / 1000).toFixed(2)}km`;
+    const distVal = spot.distanceMeters || 0;
+    const distText = distVal < 1000 
+      ? `${Math.round(distVal)}m` 
+      : `${(distVal / 1000).toFixed(2)}km`;
 
     const item = document.createElement('div');
     item.className = 'radar-item';
@@ -551,15 +689,17 @@ function updateRadarView(cityKey, userLocation = null) {
   });
 }
 
-async function searchLocation() {
-  const query = document.getElementById('map-search-input').value.trim();
+async function searchLocation(): Promise<void> {
+  const inputEl = document.getElementById('map-search-input') as HTMLInputElement | null;
+  const btn = document.getElementById('map-search-btn');
+  const query = inputEl ? inputEl.value.trim() : '';
+
   if (!query) {
     alert('Please enter a location or city name to search.');
     return;
   }
 
-  const btn = document.getElementById('map-search-btn');
-  btn.textContent = 'Searching...';
+  if (btn) btn.textContent = 'Searching...';
 
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
@@ -575,24 +715,25 @@ async function searchLocation() {
   } catch {
     alert('Geocoding service error. Please try again.');
   } finally {
-    btn.textContent = 'Search Location';
+    if (btn) btn.textContent = 'Search Location';
   }
 }
 
 const mapSearchBtn = document.getElementById('map-search-btn');
-if (mapSearchBtn) mapSearchBtn.addEventListener('click', searchLocation);
+if (mapSearchBtn) mapSearchBtn.addEventListener('click', () => { void searchLocation(); });
 
 const mapSearchInput = document.getElementById('map-search-input');
 if (mapSearchInput) {
   mapSearchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') searchLocation();
+    if (e.key === 'Enter') void searchLocation();
   });
 }
 
-const radarCitySelect = document.getElementById('radar-city-select');
+const radarCitySelect = document.getElementById('radar-city-select') as HTMLSelectElement | null;
 if (radarCitySelect) {
   radarCitySelect.addEventListener('change', (e) => {
-    updateRadarView(e.target.value);
+    const target = e.target as HTMLSelectElement;
+    updateRadarView(target.value);
   });
 }
 
@@ -621,12 +762,15 @@ const poiCreatorPanel = document.getElementById('poi-creator-panel');
 if (togglePinDropBtn && poiCreatorPanel) {
   togglePinDropBtn.addEventListener('click', () => {
     isPinDropperActive = !isPinDropperActive;
+    const latInput = document.getElementById('custom-poi-lat') as HTMLInputElement | null;
+    const lonInput = document.getElementById('custom-poi-lon') as HTMLInputElement | null;
+
     if (isPinDropperActive) {
       togglePinDropBtn.textContent = 'Active: Click Map to Drop';
       togglePinDropBtn.style.backgroundColor = 'var(--primary)';
       togglePinDropBtn.style.color = '#FFFFFF';
-      document.getElementById('custom-poi-lat').value = currentUserCoords.lat.toFixed(6);
-      document.getElementById('custom-poi-lon').value = currentUserCoords.lon.toFixed(6);
+      if (latInput) latInput.value = currentUserCoords.lat.toFixed(6);
+      if (lonInput) lonInput.value = currentUserCoords.lon.toFixed(6);
       poiCreatorPanel.classList.add('visible');
     } else {
       togglePinDropBtn.textContent = '+ Drop Custom Pin';
@@ -636,49 +780,61 @@ if (togglePinDropBtn && poiCreatorPanel) {
     }
   });
 
-  document.getElementById('cancel-poi-btn').addEventListener('click', () => {
-    isPinDropperActive = false;
-    togglePinDropBtn.textContent = '+ Drop Custom Pin';
-    togglePinDropBtn.style.backgroundColor = 'transparent';
-    togglePinDropBtn.style.color = 'var(--primary-dark)';
-    poiCreatorPanel.classList.remove('visible');
-  });
-
-  document.getElementById('save-poi-btn').addEventListener('click', () => {
-    const name = document.getElementById('custom-poi-name').value.trim();
-    const category = document.getElementById('custom-poi-category').value;
-    const lat = parseFloat(document.getElementById('custom-poi-lat').value);
-    const lon = parseFloat(document.getElementById('custom-poi-lon').value);
-    const notes = document.getElementById('custom-poi-notes').value.trim();
-
-    if (!name || isNaN(lat) || isNaN(lon)) {
-      alert('Please provide a name and valid coordinates for your custom pin.');
-      return;
-    }
-
-    customPoiList.push({
-      id: 'poi-' + Date.now(),
-      name,
-      category,
-      lat,
-      lon,
-      notes,
-      createdAt: Date.now()
+  const cancelPoiBtn = document.getElementById('cancel-poi-btn');
+  if (cancelPoiBtn) {
+    cancelPoiBtn.addEventListener('click', () => {
+      isPinDropperActive = false;
+      togglePinDropBtn.textContent = '+ Drop Custom Pin';
+      togglePinDropBtn.style.backgroundColor = 'transparent';
+      togglePinDropBtn.style.color = 'var(--primary-dark)';
+      poiCreatorPanel.classList.remove('visible');
     });
+  }
 
-    saveCustomPoisLocally();
+  const savePoiBtn = document.getElementById('save-poi-btn');
+  if (savePoiBtn) {
+    savePoiBtn.addEventListener('click', () => {
+      const nameInput = document.getElementById('custom-poi-name') as HTMLInputElement | null;
+      const categoryInput = document.getElementById('custom-poi-category') as HTMLSelectElement | null;
+      const latInput = document.getElementById('custom-poi-lat') as HTMLInputElement | null;
+      const lonInput = document.getElementById('custom-poi-lon') as HTMLInputElement | null;
+      const notesInput = document.getElementById('custom-poi-notes') as HTMLInputElement | null;
 
-    document.getElementById('custom-poi-name').value = '';
-    document.getElementById('custom-poi-notes').value = '';
-    poiCreatorPanel.classList.remove('visible');
-    isPinDropperActive = false;
-    togglePinDropBtn.textContent = '+ Drop Custom Pin';
-    togglePinDropBtn.style.backgroundColor = 'transparent';
-    togglePinDropBtn.style.color = 'var(--primary-dark)';
+      const name = nameInput ? nameInput.value.trim() : '';
+      const category = categoryInput ? categoryInput.value : 'General';
+      const lat = latInput ? parseFloat(latInput.value) : NaN;
+      const lon = lonInput ? parseFloat(lonInput.value) : NaN;
+      const notes = notesInput ? notesInput.value.trim() : '';
 
-    const selectEl = document.getElementById('radar-city-select');
-    updateRadarView(selectEl ? selectEl.value : 'cordoba', currentUserCoords);
-  });
+      if (!name || isNaN(lat) || isNaN(lon)) {
+        alert('Please provide a name and valid coordinates for your custom pin.');
+        return;
+      }
+
+      customPoiList.push({
+        id: 'poi-' + Date.now(),
+        name,
+        category,
+        lat,
+        lon,
+        notes,
+        createdAt: Date.now()
+      });
+
+      saveCustomPoisLocally();
+
+      if (nameInput) nameInput.value = '';
+      if (notesInput) notesInput.value = '';
+      poiCreatorPanel.classList.remove('visible');
+      isPinDropperActive = false;
+      togglePinDropBtn.textContent = '+ Drop Custom Pin';
+      togglePinDropBtn.style.backgroundColor = 'transparent';
+      togglePinDropBtn.style.color = 'var(--primary-dark)';
+
+      const selectEl = document.getElementById('radar-city-select') as HTMLSelectElement | null;
+      updateRadarView(selectEl ? selectEl.value : 'cordoba', currentUserCoords);
+    });
+  }
 }
 
 const exportGeojsonBtn = document.getElementById('export-geojson-btn');
@@ -745,7 +901,18 @@ if (convBtn) convBtn.addEventListener('click', convertUniversalCrossRate);
 const swapCurrenciesBtn = document.getElementById('swap-currencies-btn');
 if (swapCurrenciesBtn) swapCurrenciesBtn.addEventListener('click', swapCurrencies);
 
-function applyTickerUpdates(updates) {
+// ---------------------------------------------------------------------------
+// 6. Live WebSocket / Simulated Ticker
+// ---------------------------------------------------------------------------
+
+interface TickerUpdate {
+  pair: string;
+  rate: number;
+  change24h: number;
+  direction: 'up' | 'down' | 'neutral';
+}
+
+function applyTickerUpdates(updates: TickerUpdate[]): void {
   updates.forEach(item => {
     const pairKey = item.pair.replace('/', '-').replace(' ', '_');
     const rateText = item.rate >= 10 ? item.rate.toFixed(2) : item.rate.toFixed(4);
@@ -770,7 +937,7 @@ function applyTickerUpdates(updates) {
   });
 }
 
-function initWebSocketTicker() {
+function initWebSocketTicker(): void {
   const aboutStatus = document.getElementById('about-ws-status');
 
   if (typeof io !== 'undefined') {
@@ -785,11 +952,11 @@ function initWebSocketTicker() {
         if (aboutStatus) aboutStatus.textContent = 'Operational (ivoyager-ticker-ws connected)';
       });
 
-      socket.on('ticker:snapshot', (snapshot) => {
+      socket.on('ticker:snapshot', (snapshot: TickerUpdate[]) => {
         applyTickerUpdates(snapshot);
       });
 
-      socket.on('ticker:update', (updates) => {
+      socket.on('ticker:update', (updates: TickerUpdate[]) => {
         applyTickerUpdates(updates);
       });
 
@@ -805,11 +972,11 @@ function initWebSocketTicker() {
   }
 }
 
-function startSimulatedTicker() {
+function startSimulatedTicker(): void {
   const aboutStatus = document.getElementById('about-ws-status');
   if (aboutStatus) aboutStatus.textContent = 'Operational (Client Simulation Mode)';
 
-  const simulatedState = {
+  const simulatedState: Record<string, { rate: number; change: number }> = {
     'USD/ARS_BLUE': { rate: 1420.0, change: 1.25 },
     'USDT/ARS_P2P': { rate: 1445.0, change: 0.85 },
     'USD/BRL': { rate: 5.4200, change: -0.32 },
@@ -818,12 +985,12 @@ function startSimulatedTicker() {
   };
 
   setInterval(() => {
-    const updates = Object.entries(simulatedState).map(([pair, item]) => {
+    const updates: TickerUpdate[] = Object.entries(simulatedState).map(([pair, item]) => {
       const delta = (Math.random() - 0.49) * 0.002;
       const oldRate = item.rate;
       item.rate = Number((item.rate * (1 + delta)).toFixed(pair.includes('BRL') && !pair.includes('ARS') ? 4 : 2));
       item.change = Number((item.change + delta * 10).toFixed(2));
-      const direction = item.rate > oldRate ? 'up' : item.rate < oldRate ? 'down' : 'neutral';
+      const direction: 'up' | 'down' | 'neutral' = item.rate > oldRate ? 'up' : item.rate < oldRate ? 'down' : 'neutral';
       return {
         pair,
         rate: item.rate,
@@ -835,7 +1002,26 @@ function startSimulatedTicker() {
   }, 2500);
 }
 
-const wikivoyageGuides = {
+// ---------------------------------------------------------------------------
+// 7. Wikivoyage Travel Guides
+// ---------------------------------------------------------------------------
+
+interface GuideSection {
+  title: string;
+  content: string;
+}
+
+interface WikivoyageGuide {
+  cityName: string;
+  country: string;
+  summary: string;
+  safetyTips: string[];
+  localScams: string[];
+  emergencyContacts: Record<string, string>;
+  sections: GuideSection[];
+}
+
+const wikivoyageGuides: Record<string, WikivoyageGuide> = {
   cordoba: {
     cityName: 'Cordoba',
     country: 'Argentina',
@@ -919,7 +1105,7 @@ const wikivoyageGuides = {
   }
 };
 
-function renderWikivoyageGuide(cityKey) {
+function renderWikivoyageGuide(cityKey: string): void {
   const guide = wikivoyageGuides[cityKey] || wikivoyageGuides.cordoba;
   const summaryEl = document.getElementById('guide-city-summary');
   if (summaryEl) summaryEl.textContent = guide.summary;
@@ -951,14 +1137,27 @@ function renderWikivoyageGuide(cityKey) {
   }
 }
 
-const guideCitySelect = document.getElementById('guide-city-select');
+const guideCitySelect = document.getElementById('guide-city-select') as HTMLSelectElement | null;
 if (guideCitySelect) {
   guideCitySelect.addEventListener('change', (e) => {
-    renderWikivoyageGuide(e.target.value);
+    const target = e.target as HTMLSelectElement;
+    renderWikivoyageGuide(target.value);
   });
 }
 
-const signLexicon = [
+// ---------------------------------------------------------------------------
+// 8. Offline Sign & Menu Lexicon & On-Device OCR
+// ---------------------------------------------------------------------------
+
+interface SignItem {
+  category: string;
+  spanish: string;
+  portuguese: string;
+  english: string;
+  explanation: string;
+}
+
+const signLexicon: SignItem[] = [
   { category: 'traffic', spanish: 'Pare', portuguese: 'Pare (Parada Obrigatória)', english: 'Stop', explanation: 'Mandatory full vehicle stop at junction or intersection.' },
   { category: 'traffic', spanish: 'Ceda el paso', portuguese: 'Dê a preferência', english: 'Yield / Give Way', explanation: 'Slow down and yield right of way to crossing traffic.' },
   { category: 'traffic', spanish: 'Telepeaje', portuguese: 'Pedágio Automático (Sem Parar / Tag)', english: 'Electronic Toll Collection (RFID)', explanation: 'Automatic toll lane reserved for vehicles with active windshield tags.' },
@@ -986,8 +1185,8 @@ const signLexicon = [
 
 let currentSignCategory = 'all';
 
-function renderSignTranslator() {
-  const inputEl = document.getElementById('sign-search-input');
+function renderSignTranslator(): void {
+  const inputEl = document.getElementById('sign-search-input') as HTMLInputElement | null;
   const query = (inputEl ? inputEl.value : '').toLowerCase().trim();
   const container = document.getElementById('sign-results-container');
   if (!container) return;
@@ -1025,7 +1224,7 @@ const signSearchInput = document.getElementById('sign-search-input');
 if (signSearchInput) signSearchInput.addEventListener('input', renderSignTranslator);
 
 const scanSignCameraBtn = document.getElementById('scan-sign-camera-btn');
-const signCameraInput = document.getElementById('sign-camera-input');
+const signCameraInput = document.getElementById('sign-camera-input') as HTMLInputElement | null;
 const signOcrStatus = document.getElementById('sign-ocr-status');
 
 if (scanSignCameraBtn && signCameraInput && signOcrStatus) {
@@ -1033,8 +1232,9 @@ if (scanSignCameraBtn && signCameraInput && signOcrStatus) {
     signCameraInput.click();
   });
 
-  signCameraInput.addEventListener('change', async (e) => {
-    const file = e.target.files && e.target.files[0];
+  signCameraInput.addEventListener('change', async (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const file = target.files && target.files[0];
     if (!file) return;
 
     signOcrStatus.style.display = 'block';
@@ -1046,7 +1246,7 @@ if (scanSignCameraBtn && signCameraInput && signOcrStatus) {
       }
 
       const result = await Tesseract.recognize(file, 'spa', {
-        logger: (m) => {
+        logger: (m: any) => {
           if (m.status === 'recognizing text') {
             const progress = Math.round((m.progress || 0) * 100);
             signOcrStatus.textContent = `Scanning sign on-device (WASM): ${progress}%`;
@@ -1059,7 +1259,8 @@ if (scanSignCameraBtn && signCameraInput && signOcrStatus) {
       const rawText = (result && result.data && result.data.text) ? result.data.text.trim() : '';
       if (rawText) {
         const firstLine = rawText.split('\n')[0].replace(/[^a-zA-Z0-9\s]/g, '').trim();
-        document.getElementById('sign-search-input').value = firstLine || rawText;
+        const searchInput = document.getElementById('sign-search-input') as HTMLInputElement | null;
+        if (searchInput) searchInput.value = firstLine || rawText;
         signOcrStatus.textContent = `OCR Complete: Recognized "${firstLine || rawText}"`;
         renderSignTranslator();
         setTimeout(() => {
@@ -1068,7 +1269,7 @@ if (scanSignCameraBtn && signCameraInput && signOcrStatus) {
       } else {
         signOcrStatus.textContent = 'No text detected in image. Please try a clearer photo.';
       }
-    } catch (err) {
+    } catch (err: any) {
       signOcrStatus.textContent = `OCR Error: ${err.message || 'Failed to process image'}`;
     }
   });
@@ -1078,12 +1279,22 @@ document.querySelectorAll('.guide-pill').forEach(pill => {
   pill.addEventListener('click', () => {
     document.querySelectorAll('.guide-pill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
-    currentSignCategory = pill.getAttribute('data-category');
+    currentSignCategory = pill.getAttribute('data-category') || 'all';
     renderSignTranslator();
   });
 });
 
-const tollCorridorPresets = {
+// ---------------------------------------------------------------------------
+// 9. Highway Tolls & Cross-Border Mobility
+// ---------------------------------------------------------------------------
+
+interface TollPreset {
+  toll: number;
+  distance: number;
+  currency: string;
+}
+
+const tollCorridorPresets: Record<string, TollPreset> = {
   ruta_9: { toll: 12000, distance: 700, currency: 'ARS' },
   ruta_7: { toll: 18500, distance: 1050, currency: 'ARS' },
   autovia_2: { toll: 8400, distance: 400, currency: 'ARS' },
@@ -1091,28 +1302,34 @@ const tollCorridorPresets = {
   custom: { toll: 0, distance: 700, currency: 'ARS' }
 };
 
-function updateCorridorPreset() {
-  const corridor = document.getElementById('fuel-corridor').value;
+function updateCorridorPreset(): void {
+  const corridorEl = document.getElementById('fuel-corridor') as HTMLSelectElement | null;
   const customGroup = document.getElementById('custom-toll-group');
+  if (!corridorEl) return;
+
+  const corridor = corridorEl.value;
   if (corridor === 'custom') {
-    customGroup.style.display = 'block';
+    if (customGroup) customGroup.style.display = 'block';
   } else {
-    customGroup.style.display = 'none';
+    if (customGroup) customGroup.style.display = 'none';
     const preset = tollCorridorPresets[corridor];
     if (preset) {
-      document.getElementById('fuel-distance').value = preset.distance;
-      document.getElementById('fuel-currency').value = preset.currency;
+      const distEl = document.getElementById('fuel-distance') as HTMLInputElement | null;
+      const currEl = document.getElementById('fuel-currency') as HTMLSelectElement | null;
+      if (distEl) distEl.value = preset.distance.toString();
+      if (currEl) currEl.value = preset.currency;
     }
   }
   calculateRouteMobility();
 }
 
-function calculateRouteMobility() {
-  const distEl = document.getElementById('fuel-distance');
-  const effEl = document.getElementById('fuel-efficiency');
-  const priceEl = document.getElementById('fuel-price');
-  const currEl = document.getElementById('fuel-currency');
-  const corridorEl = document.getElementById('fuel-corridor');
+function calculateRouteMobility(): void {
+  const distEl = document.getElementById('fuel-distance') as HTMLInputElement | null;
+  const effEl = document.getElementById('fuel-efficiency') as HTMLInputElement | null;
+  const priceEl = document.getElementById('fuel-price') as HTMLInputElement | null;
+  const currEl = document.getElementById('fuel-currency') as HTMLSelectElement | null;
+  const corridorEl = document.getElementById('fuel-corridor') as HTMLSelectElement | null;
+  const customTollEl = document.getElementById('fuel-custom-toll') as HTMLInputElement | null;
 
   if (!distEl || !effEl || !priceEl || !currEl || !corridorEl) return;
 
@@ -1124,7 +1341,7 @@ function calculateRouteMobility() {
 
   let tollCost = 0;
   if (corridor === 'custom') {
-    tollCost = parseFloat(document.getElementById('fuel-custom-toll').value) || 0;
+    tollCost = customTollEl ? (parseFloat(customTollEl.value) || 0) : 0;
   } else {
     tollCost = tollCorridorPresets[corridor]?.toll || 0;
   }
@@ -1136,11 +1353,17 @@ function calculateRouteMobility() {
   const rateToBrl = getCrossRate(curr, 'BRL');
   const totalBrl = totalLocal * rateToBrl;
 
-  document.getElementById('fuel-res-liters').textContent = `${liters.toFixed(2)} Liters`;
-  document.getElementById('fuel-res-fuel-cost').textContent = `${curr} ${fuelCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('fuel-res-toll-cost').textContent = `${curr} ${tollCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('fuel-res-total-local').textContent = `${curr} ${totalLocal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  document.getElementById('fuel-res-total-brl').textContent = `R$ ${totalBrl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const resLiters = document.getElementById('fuel-res-liters');
+  const resFuelCost = document.getElementById('fuel-res-fuel-cost');
+  const resTollCost = document.getElementById('fuel-res-toll-cost');
+  const resTotalLocal = document.getElementById('fuel-res-total-local');
+  const resTotalBrl = document.getElementById('fuel-res-total-brl');
+
+  if (resLiters) resLiters.textContent = `${liters.toFixed(2)} Liters`;
+  if (resFuelCost) resFuelCost.textContent = `${curr} ${fuelCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resTollCost) resTollCost.textContent = `${curr} ${tollCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resTotalLocal) resTotalLocal.textContent = `${curr} ${totalLocal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (resTotalBrl) resTotalBrl.textContent = `R$ ${totalBrl.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 const fuelCorridor = document.getElementById('fuel-corridor');
@@ -1164,7 +1387,25 @@ if (fuelCurrency) fuelCurrency.addEventListener('change', calculateRouteMobility
 const fuelCustomToll = document.getElementById('fuel-custom-toll');
 if (fuelCustomToll) fuelCustomToll.addEventListener('input', calculateRouteMobility);
 
-const airportHubData = {
+// ---------------------------------------------------------------------------
+// 10. Airport Transit Hubs & Ground Logistics
+// ---------------------------------------------------------------------------
+
+interface AirportTransitOption {
+  mode: string;
+  duration: string;
+  fare: string;
+  details: string;
+}
+
+interface AirportHubInfo {
+  name: string;
+  city: string;
+  distance: string;
+  options: AirportTransitOption[];
+}
+
+const airportHubData: Record<string, AirportHubInfo> = {
   EZE: {
     name: 'Ministro Pistarini International Airport (Ezeiza)',
     city: 'Buenos Aires, Argentina',
@@ -1204,7 +1445,7 @@ const airportHubData = {
   }
 };
 
-function renderAirportHub(hubKey) {
+function renderAirportHub(hubKey: string): void {
   const hub = airportHubData[hubKey] || airportHubData.EZE;
   const distEl = document.getElementById('airport-distance');
   if (distEl) distEl.textContent = hub.distance;
@@ -1225,12 +1466,17 @@ function renderAirportHub(hubKey) {
   `).join('');
 }
 
-const airportHubSelect = document.getElementById('airport-hub-select');
+const airportHubSelect = document.getElementById('airport-hub-select') as HTMLSelectElement | null;
 if (airportHubSelect) {
   airportHubSelect.addEventListener('change', (e) => {
-    renderAirportHub(e.target.value);
+    const target = e.target as HTMLSelectElement;
+    renderAirportHub(target.value);
   });
 }
+
+// ---------------------------------------------------------------------------
+// 11. Initial Application Bootstrapping
+// ---------------------------------------------------------------------------
 
 renderWikivoyageGuide('cordoba');
 renderSignTranslator();
