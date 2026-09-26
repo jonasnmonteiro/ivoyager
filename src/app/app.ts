@@ -609,6 +609,20 @@ function clearRoute(): void {
 const clearRouteBtn = document.getElementById('clear-route-btn');
 if (clearRouteBtn) clearRouteBtn.addEventListener('click', clearRoute);
 
+function renderSkeletonRadar(containerId: string = 'radar-spots-container', count: number = 3): void {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="radar-item skeleton-card">
+      <div class="radar-info" style="width: 70%;">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+      </div>
+      <div class="skeleton skeleton-badge" style="width: 60px;"></div>
+    </div>
+  `).join('');
+}
+
 function updateRadarView(cityKey: string | null, userLocation: { lat: number; lon: number } | null = null): void {
   if (!markersLayer || !mapInstance) return;
 
@@ -673,7 +687,7 @@ function updateRadarView(cityKey: string | null, userLocation: { lat: number; lo
       : `${(distVal / 1000).toFixed(2)}km`;
 
     const item = document.createElement('div');
-    item.className = 'radar-item';
+    item.className = 'radar-item hydrated-fade-in';
     item.innerHTML = `
       <div class="radar-info">
         <strong>${spot.name}</strong>
@@ -1105,6 +1119,18 @@ const wikivoyageGuides: Record<string, WikivoyageGuide> = {
   }
 };
 
+function renderSkeletonGuide(sectionsContainerId: string = 'guide-sections-container', count: number = 3): void {
+  const container = document.getElementById(sectionsContainerId);
+  if (!container) return;
+  container.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="skeleton-card" style="margin-bottom: 8px; padding: 12px; display: block;">
+      <div class="skeleton skeleton-title" style="width: 40%;"></div>
+      <div class="skeleton skeleton-text" style="width: 95%;"></div>
+      <div class="skeleton skeleton-text short"></div>
+    </div>
+  `).join('');
+}
+
 function renderWikivoyageGuide(cityKey: string): void {
   const guide = wikivoyageGuides[cityKey] || wikivoyageGuides.cordoba;
   const summaryEl = document.getElementById('guide-city-summary');
@@ -1119,7 +1145,7 @@ function renderWikivoyageGuide(cityKey: string): void {
   const contactsContainer = document.getElementById('guide-emergency-contacts');
   if (contactsContainer) {
     contactsContainer.innerHTML = Object.entries(guide.emergencyContacts).map(([name, num]) => `
-      <div class="feature-item" style="padding: 6px 0;">
+      <div class="feature-item hydrated-fade-in" style="padding: 6px 0;">
         <span>${name}:</span>
         <strong>${num}</strong>
       </div>
@@ -1129,7 +1155,7 @@ function renderWikivoyageGuide(cityKey: string): void {
   const sectionsContainer = document.getElementById('guide-sections-container');
   if (sectionsContainer) {
     sectionsContainer.innerHTML = guide.sections.map(sec => `
-      <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+      <div class="hydrated-fade-in" style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
         <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 4px;">${sec.title}</strong>
         <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">${sec.content}</p>
       </div>
@@ -1445,6 +1471,21 @@ const airportHubData: Record<string, AirportHubInfo> = {
   }
 };
 
+function renderSkeletonTransit(containerId: string = 'airport-transit-options', count: number = 3): void {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = Array.from({ length: count }).map(() => `
+    <div class="skeleton-card" style="margin-bottom: 8px; padding: 12px; display: block;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <div class="skeleton skeleton-title" style="width: 50%;"></div>
+        <div class="skeleton skeleton-badge" style="width: 60px;"></div>
+      </div>
+      <div class="skeleton skeleton-text short" style="margin-bottom: 6px;"></div>
+      <div class="skeleton skeleton-text" style="width: 90%;"></div>
+    </div>
+  `).join('');
+}
+
 function renderAirportHub(hubKey: string): void {
   const hub = airportHubData[hubKey] || airportHubData.EZE;
   const distEl = document.getElementById('airport-distance');
@@ -1453,7 +1494,7 @@ function renderAirportHub(hubKey: string): void {
   const container = document.getElementById('airport-transit-options');
   if (!container) return;
   container.innerHTML = hub.options.map(opt => `
-    <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+    <div class="hydrated-fade-in" style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
         <strong style="font-size: 13px; color: var(--text-main);">${opt.mode}</strong>
         <span class="guide-badge" style="background: rgba(5, 150, 105, 0.12); color: var(--success);">${opt.duration}</span>
