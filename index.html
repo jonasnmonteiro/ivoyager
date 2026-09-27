@@ -411,18 +411,26 @@
       <section id="tab-guide" class="tab-content">
         <div class="grid">
           <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
               <h2 class="card-title" style="margin-bottom: 0;">Open Wikivoyage Travel Guide</h2>
-              <span class="guide-badge offline">Offline Pack Ready</span>
+              <span id="guide-badge-status" class="guide-badge offline">Offline Pack Ready</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label" for="guide-search-input">Search Any Global Destination (Wikivoyage Live API)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="guide-search-input" class="form-input" placeholder="Search any city or region (e.g., Bariloche, Montevideo, Cusco, Lima)...">
+                <button id="guide-search-btn" class="btn" style="width: auto; min-width: 140px; white-space: nowrap;" type="button">Fetch Guide</button>
+              </div>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="guide-city-select">Select Destination Guide</label>
+              <label class="form-label" for="guide-city-select">Or Select Offline Pre-compiled Pack</label>
               <select id="guide-city-select" class="form-select">
-                <option value="cordoba" selected>Cordoba, Argentina</option>
-                <option value="buenos_aires">Buenos Aires, Argentina</option>
-                <option value="mendoza">Mendoza, Argentina</option>
-                <option value="santiago">Santiago, Chile</option>
+                <option value="cordoba" selected>Cordoba, Argentina (Offline Pack)</option>
+                <option value="buenos_aires">Buenos Aires, Argentina (Offline Pack)</option>
+                <option value="mendoza">Mendoza, Argentina (Offline Pack)</option>
+                <option value="santiago">Santiago, Chile (Offline Pack)</option>
               </select>
             </div>
 

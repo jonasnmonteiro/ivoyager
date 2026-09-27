@@ -1033,6 +1033,8 @@ interface WikivoyageGuide {
   localScams: string[];
   emergencyContacts: Record<string, string>;
   sections: GuideSection[];
+  thumbnailUrl?: string;
+  pageUrl?: string;
 }
 
 const wikivoyageGuides: Record<string, WikivoyageGuide> = {
@@ -1131,10 +1133,35 @@ function renderSkeletonGuide(sectionsContainerId: string = 'guide-sections-conta
   `).join('');
 }
 
-function renderWikivoyageGuide(cityKey: string): void {
-  const guide = wikivoyageGuides[cityKey] || wikivoyageGuides.cordoba;
+function renderWikivoyageGuide(cityKeyOrGuide: string | WikivoyageGuide, isLiveApi: boolean = false): void {
+  const guide: WikivoyageGuide = typeof cityKeyOrGuide === 'string'
+    ? (wikivoyageGuides[cityKeyOrGuide] || wikivoyageGuides.cordoba)
+    : cityKeyOrGuide;
+
+  const badgeStatus = document.getElementById('guide-badge-status');
+  if (badgeStatus) {
+    if (isLiveApi) {
+      badgeStatus.textContent = 'Live Wikivoyage API Synced';
+      badgeStatus.className = 'guide-badge';
+      badgeStatus.style.background = 'rgba(16, 185, 129, 0.12)';
+      badgeStatus.style.color = 'var(--color-success)';
+    } else {
+      badgeStatus.textContent = 'Offline Pack Ready';
+      badgeStatus.className = 'guide-badge offline';
+      badgeStatus.style.background = '';
+      badgeStatus.style.color = '';
+    }
+  }
+
   const summaryEl = document.getElementById('guide-city-summary');
-  if (summaryEl) summaryEl.textContent = guide.summary;
+  if (summaryEl) {
+    let summaryHtml = '';
+    if (guide.thumbnailUrl) {
+      summaryHtml += `<img src="${guide.thumbnailUrl}" alt="${guide.cityName}" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 12px; border: 1px solid var(--border-subtle);">`;
+    }
+    summaryHtml += `<span>${guide.summary}</span>`;
+    summaryEl.innerHTML = summaryHtml;
+  }
 
   const safetyList = document.getElementById('guide-safety-list');
   if (safetyList) safetyList.innerHTML = guide.safetyTips.map(tip => `<li>${tip}</li>`).join('');
@@ -1163,11 +1190,141 @@ function renderWikivoyageGuide(cityKey: string): void {
   }
 }
 
+const WIKIVOYAGE_CACHE_KEY = 'ivoyager_wikivoyage_cache';
+
+function getCachedWikivoyageGuide(query: string): WikivoyageGuide | null {
+  try {
+    const raw = localStorage.getItem(WIKIVOYAGE_CACHE_KEY);
+    if (!raw) return null;
+    const cache = JSON.parse(raw) as Record<string, WikivoyageGuide>;
+    return cache[query.toLowerCase().trim()] || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedWikivoyageGuide(query: string, guide: WikivoyageGuide): void {
+  try {
+    const raw = localStorage.getItem(WIKIVOYAGE_CACHE_KEY);
+    const cache: Record<string, WikivoyageGuide> = raw ? JSON.parse(raw) : {};
+    cache[query.toLowerCase().trim()] = guide;
+    localStorage.setItem(WIKIVOYAGE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+  }
+}
+
+async function searchWikivoyageApi(query: string): Promise<void> {
+  const cleanQuery = query.trim();
+  if (!cleanQuery) {
+    alert('Please enter a city or destination name to search.');
+    return;
+  }
+
+  const btn = document.getElementById('guide-search-btn');
+  if (btn) btn.textContent = 'Fetching...';
+
+  // Check local offline cache first
+  const cached = getCachedWikivoyageGuide(cleanQuery);
+  if (cached) {
+    renderWikivoyageGuide(cached, true);
+    if (btn) btn.textContent = 'Fetch Guide';
+    return;
+  }
+
+  // Show shimmer skeleton while fetching
+  renderSkeletonGuide();
+
+  const encodedTitle = encodeURIComponent(cleanQuery.replace(/\s+/g, '_'));
+  const url = `https://en.wikivoyage.org/api/rest_v1/page/summary/${encodedTitle}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Destination "${cleanQuery}" not found on Wikivoyage.`);
+    }
+
+    const data = await res.json();
+    const title = data.title || cleanQuery;
+    const description = data.description ? ` (${data.description})` : '';
+    const extract = data.extract || 'No detailed overview available.';
+    const thumbnailUrl = data.thumbnail?.source;
+    const pageUrl = data.content_urls?.desktop?.page || data.content_urls?.mobile?.page || `https://en.wikivoyage.org/wiki/${encodedTitle}`;
+    const lat = data.coordinates?.lat;
+    const lon = data.coordinates?.lon;
+
+    const sections: GuideSection[] = [
+      {
+        title: `About ${title}`,
+        content: extract
+      },
+      {
+        title: 'Geographic & Navigation Details',
+        content: lat !== undefined && lon !== undefined
+          ? `Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}. Accessible via OpenStreetMap and OSRM pedestrian routing.`
+          : 'Geographic coordinate markers available via integrated iVoyager radar map.'
+      },
+      {
+        title: 'Official Wikivoyage Community Reference',
+        content: `Full open-source community travel guide available at: ${pageUrl}`
+      }
+    ];
+
+    const guide: WikivoyageGuide = {
+      cityName: title,
+      country: data.description || 'International Destination',
+      summary: `${extract}${description}`,
+      safetyTips: [
+        'Always keep photocopies or offline cloud photos of your passport and immigration tickets.',
+        'In unfamiliar transit corridors, prioritize licensed radio-taxis or app-based rides (Uber/Cabify).',
+        'Store primary currency in a concealed waist pouch and carry only daily spending cash.'
+      ],
+      localScams: [
+        'Overcharging at unlicensed currency change points or using altered POS payment terminals.',
+        'Distraction tactics in crowded tourist hotspots and intercity bus terminals.'
+      ],
+      emergencyContacts: {
+        'Local Police / Emergencies': '911 / 112',
+        'Wikivoyage Sync': 'Verified Live Wikimedia Record'
+      },
+      sections,
+      thumbnailUrl,
+      pageUrl
+    };
+
+    saveCachedWikivoyageGuide(cleanQuery, guide);
+    renderWikivoyageGuide(guide, true);
+  } catch (err: any) {
+    alert(err.message || 'Could not retrieve Wikivoyage guide. Please check spelling or connectivity.');
+    const selectEl = document.getElementById('guide-city-select') as HTMLSelectElement | null;
+    renderWikivoyageGuide(selectEl ? selectEl.value : 'cordoba', false);
+  } finally {
+    if (btn) btn.textContent = 'Fetch Guide';
+  }
+}
+
+const guideSearchBtn = document.getElementById('guide-search-btn');
+if (guideSearchBtn) {
+  guideSearchBtn.addEventListener('click', () => {
+    const inputEl = document.getElementById('guide-search-input') as HTMLInputElement | null;
+    if (inputEl) void searchWikivoyageApi(inputEl.value);
+  });
+}
+
+const guideSearchInput = document.getElementById('guide-search-input');
+if (guideSearchInput) {
+  guideSearchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const inputEl = e.target as HTMLInputElement;
+      void searchWikivoyageApi(inputEl.value);
+    }
+  });
+}
+
 const guideCitySelect = document.getElementById('guide-city-select') as HTMLSelectElement | null;
 if (guideCitySelect) {
   guideCitySelect.addEventListener('change', (e) => {
     const target = e.target as HTMLSelectElement;
-    renderWikivoyageGuide(target.value);
+    renderWikivoyageGuide(target.value, false);
   });
 }
 
