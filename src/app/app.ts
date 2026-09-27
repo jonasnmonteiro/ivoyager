@@ -958,8 +958,9 @@ function initWebSocketTicker(): void {
     try {
       const socket = io({
         path: '/socket.io/',
-        timeout: 3000,
-        reconnectionAttempts: 2
+        transports: ['websocket', 'polling'],
+        timeout: 5000,
+        reconnectionAttempts: 3
       });
 
       socket.on('connect', () => {
